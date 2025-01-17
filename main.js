@@ -1,38 +1,120 @@
-// Electron
-const { app, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require('electron');
+const Store = require('electron-store');
+const path = require('path');
 
-app.whenReady().then(() => {
-  // Main window
-  const window = require("./src/window");
-  mainWindow = window.createBrowserWindow(app);
+// Electron Store for persistent settings
+const store = new Store();
+let mainWindow;
 
-  // Option 1: Uses Webtag and load a custom html file with external content
-  mainWindow.loadFile("index.html");
-  //mainWindow.loadURL(`file://${__dirname}/index.html`);
+// Unified `createWindow` function
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'), // Direct path to preload script
+      contextIsolation: false,
+      nodeIntegration: true,
+      webviewTag: true, // Enable webview
+    },
+  });
 
-  // Option 2: Load directly an URL if you don't need interface customization
-  //mainWindow.loadURL("https://github.com");
+  mainWindow.loadFile(path.join(__dirname, 'index.html')); // Load the app entry point
+  mainWindow.webContents.openDevTools(); // Open DevTools for debugging
 
-  // Option 3: Uses BrowserView to load an URL
-  //const view = require("./src/view");
-  //view.createBrowserView(mainWindow);
+  // Monitor navigation for the main window
+  monitorWindowNavigation(mainWindow);
 
-  // Display Dev Tools
-  //mainWindow.openDevTools();
+  // Handle popups in the main window
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    const newWindow = new BrowserWindow({
+      width: 800,
+      height: 600,
+      webPreferences: {
+        preload: path.join(__dirname, 'renderer.js'), // Optional renderer preload
+        contextIsolation: false,
+        nodeIntegration: true,
+        webviewTag: true,
+      },
+    });
 
-  // Menu (for standard keyboard shortcuts)
-  const menu = require("./src/menu");
-  const template = menu.createTemplate(app.name);
-  const builtMenu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(builtMenu);
+    newWindow.loadURL(details.url); // Load the popup's URL
+    monitorWindowNavigation(newWindow); // Monitor its navigation
 
-  // Print function (if enabled)
-  require("./src/print");
-});
+    return { action: 'allow' }; // Allow the popup
+  });
 
-// Quit when all windows are closed.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+// Monitor navigation in any BrowserWindow
+function monitorWindowNavigation(window) {
+  const webContents = window.webContents;
+
+  webContents.on('did-navigate', (event, url) => {
+    console.log('Navigated to:', url); // Log full page navigation
+  });
+
+  webContents.on('did-navigate-in-page', (event, url) => {
+    console.log('In-page navigation to:', url); // Log in-page navigation
+  });
+}
+
+// Handle settings save via IPC
+ipcMain.handle('save-settings', (event, deviceId, computerName) => {
+  try {
+    store.set('deviceId', deviceId); // Save settings in Electron Store
+    store.set('computerName', computerName);
+    return { success: true };
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    return { success: false };
   }
 });
+
+// Handle screen recording sources via IPC
+ipcMain.handle('getSources', async () => {
+  return await desktopCapturer.getSources({ types: ['window', 'screen'] });
+});
+
+// Handle save dialog via IPC
+ipcMain.handle('showSaveDialog', async () => {
+  return await dialog.showSaveDialog({
+    buttonLabel: 'Save video',
+    defaultPath: `vid-${Date.now()}.webm`,
+  });
+});
+
+// Get the operating system
+ipcMain.handle('getOperatingSystem', () => {
+  return process.platform;
+});
+
+// App event handling
+app.whenReady().then(() => {
+  createWindow();
+
+  // Monitor any newly created windows
+  app.on('browser-window-created', (event, newWindow) => {
+    monitorWindowNavigation(newWindow);
+  });
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+// Handle Squirrel startup events on Windows
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
