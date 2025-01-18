@@ -1,33 +1,87 @@
 let currentQuestionIndex = 1;  // Start from question number 1
 let pollResponses = [];
-
-// Set the number of questions to 3 (hardcoded for now)
-let totalQuestions = 3;
-
-// The same question for all iterations
-const pollQuestionTemplate = { question: "Please select your choice of option", options: ["A", "B", "C", "D"] };
+let totalQuestions = 3;  // Default value, will be updated after OTP verification
+let pollID = null;  // Store the poll ID after OTP validation
 
 // Get HTML elements
+const otpInput = document.getElementById('otpInput');
+const startPollBtn = document.getElementById('startPollBtn');
 const pollQuestion = document.getElementById('pollQuestion');
 const optionsContainer = document.getElementById('options');
 const nextBtn = document.getElementById('nextBtn');
 const submitPollBtn = document.getElementById('submitPollBtn');
+const pollQuestionContainer = document.getElementById('pollQuestionContainer');
+const otpContainer = document.getElementById('otpContainer');
 
-// Display the question based on the current index
+// Function to display the poll question
 function displayQuestion() {
-  const question = pollQuestionTemplate;  // Use the same question for all iterations
-
-  // Update question number
-  pollQuestion.textContent = `Question ${currentQuestionIndex}: ${question.question}`;
+  const question = { question: "Please select your choice of option", options: ["A", "B", "C", "D"] };
   
+  pollQuestion.textContent = `Question ${currentQuestionIndex}: ${question.question}`;
   optionsContainer.innerHTML = '';
   question.options.forEach(option => {
     optionsContainer.innerHTML += `<label><input type="radio" name="option" value="${option}"> ${option}</label><br>`;
   });
 }
 
+// Function to start the poll after OTP validation
+async function startPoll() {
+  const otp = otpInput.value;
+
+  if (otp.length !== 6 || isNaN(otp)) {
+    alert("Please enter a valid 6-digit OTP.");
+    return;
+  }
+
+  // GraphQL query to get poll ID
+  const response = await fetch('http://localhost:5002/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `query {
+        getPollIDByOTP(otp: "${otp}")
+      }`
+    })
+  });
+  const data = await response.json();
+
+  if (data.data.getPollIDByOTP) {
+    pollID = data.data.getPollIDByOTP;
+
+    // Fetch the number of questions
+    const numQuestionsResponse = await fetch('http://localhost:5002/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `query {
+          getPoll(id: "${pollID}") {
+            numQuestions
+          }
+        }`
+      })
+    });
+    const numQuestionsData = await numQuestionsResponse.json();
+    totalQuestions = numQuestionsData.data.getPoll.numQuestions;
+
+    // Hide OTP container and show the poll
+    otpContainer.style.display = 'none';
+    pollQuestionContainer.style.display = 'block';
+
+    displayQuestion();
+  } else {
+    alert("Invalid OTP. Please try again.");
+  }
+}
+
+// Handle the Start Poll button click
+startPollBtn.onclick = startPoll;
+
 // Handle the Next button click
-nextBtn.onclick = () => {
+nextBtn.onclick = async () => {
   const selectedOption = document.querySelector('input[name="option"]:checked');
   if (!selectedOption) {
     alert("Please select an option before proceeding.");
@@ -35,6 +89,30 @@ nextBtn.onclick = () => {
   }
 
   pollResponses.push(selectedOption.value);
+
+  // Mutation to submit the response
+  const response = await fetch('http://localhost:5002/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: `mutation {
+        createResponse(input: {
+          deviceID: "123",
+          answer: "${selectedOption.value}",
+          questionNumber: ${currentQuestionIndex},
+          pollID: "${pollID}"
+        }) {
+          id
+        }
+      }`
+    })
+  });
+
+  const mutationData = await response.json();
+  console.log("Response submitted:", mutationData);
+
   currentQuestionIndex++;
 
   if (currentQuestionIndex <= totalQuestions) {
@@ -52,7 +130,3 @@ submitPollBtn.onclick = () => {
   alert("Poll submitted! Check the console for responses.");
   window.close(); // Close the poll window after submission
 };
-
-// Initialize the poll
-document.getElementById('pollQuestionContainer').style.display = 'block';  // Show the poll container
-displayQuestion();

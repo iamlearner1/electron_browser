@@ -20,7 +20,7 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'index.html')); // Load the app entry point
-  mainWindow.webContents.openDevTools(); // Open DevTools for debugging
+  // mainWindow.webContents.openDevTools(); // Open DevTools for debugging
 
   // Monitor navigation for the main window
   monitorWindowNavigation(mainWindow);
@@ -135,7 +135,7 @@ function openPollWindow() {
   pollWindow.loadFile('poll.html'); // Load the poll HTML
 
   // Open dev tools for debugging (optional)
-  pollWindow.webContents.openDevTools();
+ // pollWindow.webContents.openDevTools();
 }
 
 // Listen for the event to open the poll window

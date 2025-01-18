@@ -29,7 +29,13 @@
   </style>
 </head>
 <body>
-  <div id="pollQuestionContainer">
+  <div id="otpContainer">
+    <h2>Enter Poll OTP</h2>
+    <input type="number" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" />
+    <button id="startPollBtn">Start Poll</button>
+  </div>
+  
+  <div id="pollQuestionContainer" style="display: none;">
     <h2 id="pollQuestion">Question 1</h2>
     <div id="options">
       <label><input type="radio" name="option" value="A"> A</label><br>
@@ -39,8 +45,9 @@
     </div>
     <button id="nextBtn">Next</button>
   </div>
-  <button id="submitPollBtn" style="display: none;">Submit Poll</button>
   
+  <button id="submitPollBtn" style="display: none;">Submit Poll</button>
+
   <script src="poll.js"></script>
 </body>
 </html>
