@@ -166,14 +166,6 @@
     </div>
   </div>
 
-  <script>
-    const { ipcRenderer } = require('electron'); // Import ipcRenderer
-    
-    document.getElementById('startPollBtn').onclick = () => {
-      ipcRenderer.send('open-poll'); // Open poll window when clicked
-    };
-  </script>
-
   <script src="renderer.js"></script>
 </body>
 </html>

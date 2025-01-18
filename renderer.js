@@ -178,3 +178,8 @@ async function stopRecording() {
     writeFile(filePath, buffer, () => console.log('Video saved successfully!'));
   }
 }
+
+    
+document.getElementById('startPollBtn').onclick = () => {
+  ipcRenderer.send('open-poll'); // Open poll window when clicked
+};
