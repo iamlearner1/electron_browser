@@ -119,9 +119,9 @@ if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
-
+let pollWindow;
 function openPollWindow() {
-  const pollWindow = new BrowserWindow({
+  pollWindow = new BrowserWindow({
     width: 600,
     height: 400,
     parent: mainWindow, // Make the poll window a child of the main window
@@ -141,4 +141,9 @@ function openPollWindow() {
 // Listen for the event to open the poll window
 ipcMain.on('open-poll', () => {
   openPollWindow();
+});
+
+
+ipcMain.on('close-window', () => {
+  pollWindow.close();  // Close the window when requested
 });

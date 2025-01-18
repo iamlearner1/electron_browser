@@ -12,6 +12,10 @@ const nextBtn = document.getElementById('nextBtn');
 const submitPollBtn = document.getElementById('submitPollBtn');
 const pollQuestionContainer = document.getElementById('pollQuestionContainer');
 const otpContainer = document.getElementById('otpContainer');
+const closeBtn = document.getElementById('closeBtn');
+
+// Initially enable the close button
+closeBtn.disabled = false;
 
 // Function to display the poll question
 function displayQuestion() {
@@ -32,6 +36,9 @@ async function startPoll() {
     alert("Please enter a valid 6-digit OTP.");
     return;
   }
+
+  // Disable the close button after poll starts
+  closeBtn.disabled = true;
 
   // GraphQL query to get poll ID
   const response = await fetch('http://localhost:5002/graphql', {
@@ -120,6 +127,7 @@ nextBtn.onclick = async () => {
   } else {
     nextBtn.style.display = 'none';
     submitPollBtn.style.display = 'block';
+    closeBtn.disabled = false; // Enable the close button after poll is submitted
   }
 };
 
@@ -128,5 +136,21 @@ submitPollBtn.onclick = () => {
   console.log("Poll Responses:", pollResponses);
   // You can send pollResponses to your API here
   alert("Poll submitted! Check the console for responses.");
-  window.close(); // Close the poll window after submission
+  closeBtn.disabled = false; // Ensure close button is enabled after submission
+};
+
+// Handle the Close button click
+closeBtn.onclick = () => {
+  if (!closeBtn.disabled) {
+    window.location.href = "mainWindow.html"; // Redirect to the main window (replace with actual URL)
+  }
+};
+
+const { ipcRenderer } = require('electron');  // Import ipcRenderer to communicate with main process
+
+// Handle the Close button click
+closeBtn.onclick = () => {
+  if (!closeBtn.disabled) {
+    ipcRenderer.send('close-window');  // Send a message to the main process to handle closing the window
+  }
 };
