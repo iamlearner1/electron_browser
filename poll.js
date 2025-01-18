@@ -145,12 +145,3 @@ closeBtn.onclick = () => {
     window.location.href = "mainWindow.html"; // Redirect to the main window (replace with actual URL)
   }
 };
-
-const { ipcRenderer } = require('electron');  // Import ipcRenderer to communicate with main process
-
-// Handle the Close button click
-closeBtn.onclick = () => {
-  if (!closeBtn.disabled) {
-    ipcRenderer.send('close-window');  // Send a message to the main process to handle closing the window
-  }
-};
