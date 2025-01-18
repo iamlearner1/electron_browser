@@ -78,8 +78,6 @@
       border: 1px solid #ccc;
     }
 
-
-
     #settingsModal, #register-dialog {
       display: none;
       position: fixed;
@@ -129,6 +127,8 @@
     <button id="prev-button">Back</button>
     <button id="next-button">Forward</button>
     <button id="settingsButton">Settings</button>
+    <button id="startPollBtn">Start Poll</button>
+    
   </div>
 
   <div style="text-align: center; margin-top: 10px;">
@@ -141,7 +141,6 @@
   <webview id="webview" src="https://www.example.com"></webview>
 
   <!-- Settings Modal -->
- 
   <div id="settingsModal">
     <div class="modal-content">
       <h2>Enter Device ID and Computer Name</h2>
@@ -166,6 +165,14 @@
       <button id="register-close">Close</button>
     </div>
   </div>
+
+  <script>
+    const { ipcRenderer } = require('electron'); // Import ipcRenderer
+    
+    document.getElementById('startPollBtn').onclick = () => {
+      ipcRenderer.send('open-poll'); // Open poll window when clicked
+    };
+  </script>
 
   <script src="renderer.js"></script>
 </body>

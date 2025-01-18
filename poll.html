@@ -1,0 +1,46 @@
+<!-- poll.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poll</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    #pollQuestion {
+      margin-bottom: 20px;
+    }
+    #options {
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div id="pollQuestionContainer">
+    <h2 id="pollQuestion">Question 1</h2>
+    <div id="options">
+      <label><input type="radio" name="option" value="A"> A</label><br>
+      <label><input type="radio" name="option" value="B"> B</label><br>
+      <label><input type="radio" name="option" value="C"> C</label><br>
+      <label><input type="radio" name="option" value="D"> D</label><br>
+    </div>
+    <button id="nextBtn">Next</button>
+  </div>
+  <button id="submitPollBtn" style="display: none;">Submit Poll</button>
+  <script src="poll.js"></script>
+</body>
+</html>

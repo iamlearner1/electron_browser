@@ -118,3 +118,27 @@ app.whenReady().then(() => {
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
+
+
+function openPollWindow() {
+  const pollWindow = new BrowserWindow({
+    width: 600,
+    height: 400,
+    parent: mainWindow, // Make the poll window a child of the main window
+    modal: true, // Makes the poll window modal (blocks interaction with the main window)
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  pollWindow.loadFile('poll.html'); // Load the poll HTML
+
+  // Open dev tools for debugging (optional)
+  pollWindow.webContents.openDevTools();
+}
+
+// Listen for the event to open the poll window
+ipcMain.on('open-poll', () => {
+  openPollWindow();
+});
