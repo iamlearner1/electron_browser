@@ -1,14 +1,11 @@
-// poll.js
-
-let currentQuestionIndex = 0;
+let currentQuestionIndex = 1;  // Start from question number 1
 let pollResponses = [];
 
-// Example poll questions
-const pollQuestions = [
-  { question: "What is your favorite color?", options: ["A. Red", "B. Blue", "C. Green", "D. Yellow"] },
-  { question: "What is your favorite animal?", options: ["A. Dog", "B. Cat", "C. Bird", "D. Fish"] },
-  // More questions can be added here
-];
+// Set the number of questions to 3 (hardcoded for now)
+let totalQuestions = 3;
+
+// The same question for all iterations
+const pollQuestionTemplate = { question: "Please select your choice of option", options: ["A", "B", "C", "D"] };
 
 // Get HTML elements
 const pollQuestion = document.getElementById('pollQuestion');
@@ -16,10 +13,12 @@ const optionsContainer = document.getElementById('options');
 const nextBtn = document.getElementById('nextBtn');
 const submitPollBtn = document.getElementById('submitPollBtn');
 
-// Display a question
+// Display the question based on the current index
 function displayQuestion() {
-  const question = pollQuestions[currentQuestionIndex];
-  pollQuestion.textContent = question.question;
+  const question = pollQuestionTemplate;  // Use the same question for all iterations
+
+  // Update question number
+  pollQuestion.textContent = `Question ${currentQuestionIndex}: ${question.question}`;
   
   optionsContainer.innerHTML = '';
   question.options.forEach(option => {
@@ -38,7 +37,7 @@ nextBtn.onclick = () => {
   pollResponses.push(selectedOption.value);
   currentQuestionIndex++;
 
-  if (currentQuestionIndex < pollQuestions.length) {
+  if (currentQuestionIndex <= totalQuestions) {
     displayQuestion();
   } else {
     nextBtn.style.display = 'none';
@@ -55,4 +54,5 @@ submitPollBtn.onclick = () => {
 };
 
 // Initialize the poll
+document.getElementById('pollQuestionContainer').style.display = 'block';  // Show the poll container
 displayQuestion();
