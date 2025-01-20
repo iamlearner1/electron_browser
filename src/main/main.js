@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require('electr
 const path = require('path');
 const Store = require('electron-store');
 const { setupIPC } = require('./ipcHandlers'); // Import IPC handler setup
-
+const { saveDeviceInfo, getDeviceInfo } = require('./utils/store');
 // Electron Store for persistent settings
 const store = new Store();
 let mainWindow;
@@ -65,8 +65,10 @@ ipcMain.handle('getOperatingSystem', () => {
 
 // App event handling
 app.whenReady().then(() => {
+  saveDeviceInfo();  // Save device info to store
+  const deviceInfo = getDeviceInfo(); // Retrieve saved device info
+  // console.log('Retrieved Device Info:', deviceInfo);
   createMainWindow(); // Create the main window
-
   // Monitor any newly created windows
   app.on('browser-window-created', (event, newWindow) => {
     monitorWindowNavigation(newWindow);
@@ -84,6 +86,12 @@ app.whenReady().then(() => {
     }
   });
 });
+
+// Listen for the request to get deviceID
+ipcMain.handle('get-device-id', () => {
+  return getDeviceInfo();  // Retrieve the device ID from the store
+});
+
 
 // Handle Squirrel startup events on Windows
 if (require('electron-squirrel-startup')) {

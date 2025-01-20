@@ -1,4 +1,4 @@
-const { ipcRenderer } = require("electron/renderer");
+const { ipcRenderer } = require('electron');
 
 let currentQuestionIndex = 1;  // Start from question number 1
 let pollResponses = [];
@@ -99,6 +99,11 @@ nextBtn.onclick = async () => {
 
   pollResponses.push(selectedOption.value);
 
+  // Get the deviceID from the main process using IPC
+  const deviceInfo = await ipcRenderer.invoke('get-device-id');
+  const deviceID = deviceInfo.deviceID;  // Extract the deviceID
+
+
   // Mutation to submit the response
   const response = await fetch('http://localhost:5002/graphql', {
     method: 'POST',
@@ -108,7 +113,7 @@ nextBtn.onclick = async () => {
     body: JSON.stringify({
       query: `mutation {
         createResponse(input: {
-          deviceID: "123",
+          deviceID: "${deviceID}",
           answer: "${selectedOption.value}",
           questionNumber: ${currentQuestionIndex},
           pollID: "${pollID}"
@@ -138,14 +143,11 @@ submitPollBtn.onclick = () => {
   console.log("Poll Responses:", pollResponses);
   // You can send pollResponses to your API here
   alert("Poll submitted! Check the console for responses.");
+  window.close();
   closeBtn.disabled = false; // Ensure close button is enabled after submission
 };
 
 // Handle the Close button click
 closeBtn.onclick = () => {
-  // if (!closeBtn.disabled) {
-  //     ipcRenderer.send('close-poll');
-  //     window.close();
-  // }
   window.close();
 };
