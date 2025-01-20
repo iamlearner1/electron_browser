@@ -183,3 +183,9 @@ async function stopRecording() {
 document.getElementById('startPollBtn').onclick = () => {
   ipcRenderer.send('open-poll'); // Open poll window when clicked
 };
+
+
+    
+document.getElementById('startQuizBtn').onclick = () => {
+  ipcRenderer.send('open-quiz'); // Open poll window when clicked
+};

@@ -1,0 +1,11 @@
+#surveyElement {
+    position: relative; /* Change from absolute to relative */
+    height: 90%; /* Reduce height to leave space for the button */
+  }
+  
+  #closeQuizBtn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000; /* Ensure it appears above other elements */
+  }

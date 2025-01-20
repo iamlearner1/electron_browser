@@ -138,12 +138,41 @@ function openPollWindow() {
  // pollWindow.webContents.openDevTools();
 }
 
+
+let quizWindow;
+function opequizWindow() {
+  pollWindow = new BrowserWindow({
+    width: 800,
+    height: 400,
+    parent: mainWindow, // Make the poll window a child of the main window
+    modal: true, // Makes the poll window modal (blocks interaction with the main window)
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  pollWindow.loadFile('quiz.html'); // Load the poll HTML
+
+  // Open dev tools for debugging (optional)
+ // pollWindow.webContents.openDevTools();
+}
+
 // Listen for the event to open the poll window
 ipcMain.on('open-poll', () => {
   openPollWindow();
 });
 
 
+// Listen for the event to open the quiz window
+ipcMain.on('open-quiz', () => {
+  opequizWindow();
+});
+ipcMain.on("close-quiz", () => {
+  if (quizWindow) {
+      quizWindow.close();
+  }
+});
 ipcMain.on('close-window', () => {
   pollWindow.close();  // Close the window when requested
 });
