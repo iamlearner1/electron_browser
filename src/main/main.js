@@ -1,13 +1,14 @@
 const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require('electron');
-const Store = require('electron-store');
 const path = require('path');
-
+const Store = require('electron-store');
+const { setupIPC } = require('./ipcHandlers'); // Import IPC handler setup
+const { saveDeviceInfo, getDeviceInfo } = require('./utils/store');
 // Electron Store for persistent settings
 const store = new Store();
 let mainWindow;
 
-// Unified `createWindow` function
-function createWindow() {
+// Function to create the main window
+function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -19,31 +20,13 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html')); // Load the app entry point
-  mainWindow.webContents.openDevTools(); // Open DevTools for debugging
+  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html')); // Correct path to the index.html file
 
-  // Monitor navigation for the main window
-  monitorWindowNavigation(mainWindow);
 
-  // Handle popups in the main window
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    const newWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
-      webPreferences: {
-        preload: path.join(__dirname, 'renderer.js'), // Optional renderer preload
-        contextIsolation: false,
-        nodeIntegration: true,
-        webviewTag: true,
-      },
-    });
+  // Setup IPC communication
+  setupIPC(mainWindow);
 
-    newWindow.loadURL(details.url); // Load the popup's URL
-    monitorWindowNavigation(newWindow); // Monitor its navigation
-
-    return { action: 'allow' }; // Allow the popup
-  });
-
+  // Handle window close
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -61,18 +44,6 @@ function monitorWindowNavigation(window) {
     console.log('In-page navigation to:', url); // Log in-page navigation
   });
 }
-
-// Handle settings save via IPC
-ipcMain.handle('save-settings', (event, deviceId, computerName) => {
-  try {
-    store.set('deviceId', deviceId); // Save settings in Electron Store
-    store.set('computerName', computerName);
-    return { success: true };
-  } catch (error) {
-    console.error('Error saving settings:', error);
-    return { success: false };
-  }
-});
 
 // Handle screen recording sources via IPC
 ipcMain.handle('getSources', async () => {
@@ -94,8 +65,10 @@ ipcMain.handle('getOperatingSystem', () => {
 
 // App event handling
 app.whenReady().then(() => {
-  createWindow();
-
+  saveDeviceInfo();  // Save device info to store
+  const deviceInfo = getDeviceInfo(); // Retrieve saved device info
+  // console.log('Retrieved Device Info:', deviceInfo);
+  createMainWindow(); // Create the main window
   // Monitor any newly created windows
   app.on('browser-window-created', (event, newWindow) => {
     monitorWindowNavigation(newWindow);
@@ -109,10 +82,16 @@ app.whenReady().then(() => {
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      createMainWindow();
     }
   });
 });
+
+// Listen for the request to get deviceID
+ipcMain.handle('get-device-id', () => {
+  return getDeviceInfo();  // Retrieve the device ID from the store
+});
+
 
 // Handle Squirrel startup events on Windows
 if (require('electron-squirrel-startup')) {
