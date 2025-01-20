@@ -9,5 +9,5 @@ survey.render(document.getElementById("surveyElement"));
 document.getElementById("closeQuizBtn").addEventListener('click',()=>{
 
     console.log("closed button as been clicked");
-    ipcRenderer.sender('close-quiz');
+    ipcRenderer.send('close-quiz');
 })
