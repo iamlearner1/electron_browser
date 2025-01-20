@@ -9,6 +9,11 @@ module.exports = {
     ipcMain.on('close-quiz', () => {
       if (quizWindow) quizWindow.close();
     });
+    // ipcMain.on('close-poll',()=>{
+    //   if(pollWindow){
+    //     pollWindow.close();
+    //   }
+    // })
     ipcMain.on('close-window', () => {
       if (pollWindow) pollWindow.close();
     });

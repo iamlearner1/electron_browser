@@ -2,8 +2,6 @@ const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require('electr
 const path = require('path');
 const Store = require('electron-store');
 const { setupIPC } = require('./ipcHandlers'); // Import IPC handler setup
-const {openPollWindow} = require("./windows/pollWindow")
-const {openQuizWindow} = require("./windows/quizWindow")
 
 // Electron Store for persistent settings
 const store = new Store();
@@ -33,16 +31,6 @@ function createMainWindow() {
     mainWindow = null;
   });
 }
-
-// Listen for the event to open the poll window
-ipcMain.on('open-poll', () => {
-  openPollWindow(mainWindow); // Open poll window
-});
-
-// Listen for the event to open the quiz window
-ipcMain.on('open-quiz', () => {
-  openQuizWindow(mainWindow); // Open quiz window
-});
 
 // Monitor navigation in any BrowserWindow
 function monitorWindowNavigation(window) {

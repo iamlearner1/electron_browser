@@ -23,4 +23,4 @@ function openPollWindow(mainWindow) {
   });
 }
 
-module.exports = { openPollWindow };  // Export the function properly
+module.exports = { openPollWindow,pollWindow };  // Export the function properly

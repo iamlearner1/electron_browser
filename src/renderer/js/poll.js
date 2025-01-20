@@ -1,3 +1,5 @@
+const { ipcRenderer } = require("electron/renderer");
+
 let currentQuestionIndex = 1;  // Start from question number 1
 let pollResponses = [];
 let totalQuestions = 3;  // Default value, will be updated after OTP verification
@@ -141,7 +143,9 @@ submitPollBtn.onclick = () => {
 
 // Handle the Close button click
 closeBtn.onclick = () => {
-  if (!closeBtn.disabled) {
-    window.location.href = "mainWindow.html"; // Redirect to the main window (replace with actual URL)
-  }
+  // if (!closeBtn.disabled) {
+  //     ipcRenderer.send('close-poll');
+  //     window.close();
+  // }
+  window.close();
 };
