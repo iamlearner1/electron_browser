@@ -1,17 +1,36 @@
 {
     "name": "electron-app",
     "version": "1.0.0",
-    "main": "main.js",
+    "description": "An Electron app with poll and quiz windows",
+    "main": "src/main/main.js",
     "scripts": {
-        "start": "electron ."
+      "start": "electron .",           
+      "dev": "electron .",             
+      "rebuild": "electron-rebuild",   
+      "package": "electron-packager . ElectronApp --platform=win32 --arch=x64 --out=dist", 
+      "clean": "rm -rf node_modules dist"
     },
     "dependencies": {
-        "electron": "^24.0.0",
-        "electron-squirrel-startup": "^1.0.1",
-        "electron-store": "^8.2.0"
+      "electron": "^24.0.0",                
+      "electron-squirrel-startup": "^1.0.1",
+      "electron-store": "^8.2.0"          
     },
     "devDependencies": {
-        "electron-rebuild": "^3.2.5"
+      "electron-rebuild": "^3.2.5",      
+      "electron-packager": "^17.1.1"       
     },
-    "type": "commonjs"
-}
+    "author": "Your Name",                 
+    "license": "MIT",
+    "type": "commonjs",                     
+    "keywords": [
+      "electron",
+      "poll",
+      "quiz",
+      "desktop-app"
+    ],
+    "engines": {
+      "node": ">=16",                       
+      "electron": "^24.0.0"
+    }
+  }
+  
