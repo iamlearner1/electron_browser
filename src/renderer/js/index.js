@@ -1,15 +1,44 @@
 const { ipcRenderer } = require('electron');
 const { writeFile } = require('fs');
 
+
+async function fetchAllowedDomains() {
+  try {
+    const response = await fetch('http://localhost:5008/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
+          query {
+            getAllWebsiteLists {
+              domain
+            }
+          }
+        `,
+      }),
+    });
+
+    const result = await response.json();
+    allowedDomains = result.data.getAllWebsiteLists.map((item) => item.domain.trim().toLowerCase());
+    console.log('Allowed domains:', allowedDomains);
+  } catch (error) {
+    console.error('Error fetching allowed domains:', error);
+  }
+}
+
 // Webview controls
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  await fetchAllowedDomains(); // Fetch domains on startup
+
   const searchButton = document.getElementById('search-button');
   const urlInput = document.getElementById('url-input');
   const webview = document.getElementById('webview');
   const prevButton = document.getElementById('prev-button');
   const nextButton = document.getElementById('next-button');
 
-  // When the "Search" button is clicked, load the URL into the webview
+  // When the "Search" button is clicked, validate and load the URL into the webview
   searchButton.addEventListener('click', () => {
     let url = urlInput.value.trim();
 
@@ -18,34 +47,33 @@ window.addEventListener('DOMContentLoaded', () => {
       url = 'https://' + url;
     }
 
-    // Update the webview source
-    webview.src = url;
+    const domain = new URL(url).hostname.toLowerCase();
+
+    // Validate the domain
+    if (allowedDomains.includes(domain)) {
+      webview.src = url; // Load the URL if it's in the allowed list
+    } else {
+      alert('Access to this website is not allowed.');
+    }
   });
 
-  // Capture navigation events for the webview inside the main window
+  // Navigation and other webview-related event listeners remain unchanged
   webview.addEventListener('did-navigate', (event) => {
     console.log('Navigated to:', event.url);
-
-    // Update the search input field to reflect the new URL
     urlInput.value = event.url;
   });
 
-  // Capture in-page navigation (like anchor tag clicks)
   webview.addEventListener('did-navigate-in-page', (event) => {
     console.log('In-page navigation to:', event.url);
-
-    // Update the search input field to reflect the new URL
     urlInput.value = event.url;
   });
 
-  // When "Back" button is clicked, navigate to the previous page in history
   prevButton.addEventListener('click', () => {
     if (webview.canGoBack()) {
       webview.goBack();
     }
   });
 
-  // When "Forward" button is clicked, navigate to the next page in history
   nextButton.addEventListener('click', () => {
     if (webview.canGoForward()) {
       webview.goForward();
