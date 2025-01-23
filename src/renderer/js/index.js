@@ -1,7 +1,9 @@
 const { ipcRenderer } = require('electron');
 const { writeFile } = require('fs');
 
+let allowedDomains = [];
 
+// Fetch allowed domains from the GraphQL API
 async function fetchAllowedDomains() {
   try {
     const response = await fetch('http://localhost:5008/graphql', {
@@ -28,6 +30,41 @@ async function fetchAllowedDomains() {
   }
 }
 
+// Function to log website navigation
+
+async function logWebsiteNavigation(category, pageUrl, domain) {
+  try {
+    // Get device ID using ipcRenderer to communicate with the main process
+    const deviceID = "67484b01934a181fde992776";
+    
+    const mutation = `
+      mutation {
+        createWebsiteUsageLogOrList(
+          category: "${category}",
+          page_url: "${pageUrl}",
+          device_id: "${deviceID}",
+          domain: "${domain}"
+        ){
+          
+        _id
+        }
+      }
+    `;
+
+    const response = await fetch('http://localhost:5008/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: mutation }),
+    });
+
+    const result = await response.json();
+    console.log('Website usage logged:', result);
+  } catch (error) {
+    console.error('Error logging website usage:', error);
+  }
+}
 // Webview controls
 window.addEventListener('DOMContentLoaded', async () => {
   await fetchAllowedDomains(); // Fetch domains on startup
@@ -52,19 +89,24 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Validate the domain
     if (allowedDomains.includes(domain)) {
       webview.src = url; // Load the URL if it's in the allowed list
+
+      // Log the website navigation
+      logWebsiteNavigation('Navigation', url, domain);
     } else {
       alert('Access to this website is not allowed.');
     }
   });
 
-  // Navigation and other webview-related event listeners remain unchanged
+  // Log navigation for in-page and other events
   webview.addEventListener('did-navigate', (event) => {
-    console.log('Navigated to:', event.url);
+    const domain = new URL(event.url).hostname.toLowerCase();
+    logWebsiteNavigation('Navigation', event.url, domain);
     urlInput.value = event.url;
   });
 
   webview.addEventListener('did-navigate-in-page', (event) => {
-    console.log('In-page navigation to:', event.url);
+    const domain = new URL(event.url).hostname.toLowerCase();
+    logWebsiteNavigation('In-page Navigation', event.url, domain);
     urlInput.value = event.url;
   });
 
@@ -80,6 +122,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
 
 // Settings modal controls
 const settingsButton = document.getElementById('settingsButton');
