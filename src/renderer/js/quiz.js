@@ -5,36 +5,35 @@ async function fetchQuizData(quizId) {
   const query = `
     query {
       getQuiz(id: "${quizId}") {
-    id
-    title
-    showProgressBar
-    showTimer
-    timeLimitPerPage
-    timeLimit
-    firstPageIsStarted
-    startSurveyText
-    completedHtml
-    completedHtmlOnCondition {
-      expression
-      html
-    }
-    pages {
-      elements {
-        type
-        html
-        name
-        titleLocation
-        isRequired
-        maxLength
+        id
         title
-        choices
-        correctAnswer
-        choicesOrder
+        showProgressBar
+        showTimer
+        timeLimitPerPage
+        timeLimit
+        firstPageIsStarted
+        startSurveyText
+        completedHtml
+        completedHtmlOnCondition {
+          expression
+          html
+        }
+        pages {
+          elements {
+            type
+            html
+            name
+            titleLocation
+            isRequired
+            maxLength
+            title
+            choices
+            correctAnswer
+            choicesOrder
+          }
+        }
       }
     }
-  }
-}
-
   `;
 
   try {
@@ -55,8 +54,9 @@ async function fetchQuizData(quizId) {
       const survey = new Survey.Model(data.getQuiz);
 
       // Handle survey completion
-      survey.onComplete.add((sender) => {
+      survey.onComplete.add(async (sender) => {
         console.log("Survey Results:", JSON.stringify(sender.data, null, 3));
+        await submitQuizResponse(sender.data, quizId);
       });
 
       // Render the survey
@@ -66,6 +66,53 @@ async function fetchQuizData(quizId) {
     }
   } catch (error) {
     console.error("Error fetching quiz data:", error);
+  }
+}
+
+// Function to submit each quiz response
+async function submitQuizResponse(answers, quizId) {
+  try {
+    // Iterate through the survey results and submit each answer
+    for (const key of Object.keys(answers)) {
+      // Ignore non-question keys like "username" or other metadata
+      if (!isNaN(key)) {
+        const questionNumber = parseInt(key, 10);
+        const answer = answers[key];
+
+        const mutation = `
+          mutation {
+            createResponse(input: {
+              deviceID: "AVC",
+              pollID: "${quizId}",
+              answer: "${answer}",
+              questionNumber: ${questionNumber}
+            }) {
+              id
+            }
+          }
+        `;
+
+        const response = await fetch("http://localhost:5002/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: mutation }),
+        });
+
+        const { data } = await response.json();
+
+        if (data && data.createResponse) {
+          console.log(`Response for question ${questionNumber} submitted successfully:`, data.createResponse.id);
+        } else {
+          console.error(`Failed to submit response for question ${questionNumber}.`);
+        }
+      }
+    }
+
+    alert("All quiz responses submitted successfully!");
+  } catch (error) {
+    console.error("Error submitting quiz responses:", error);
   }
 }
 

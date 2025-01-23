@@ -5,7 +5,6 @@
     "main": "src/main/main.js",
     "scripts": {
         "start": "electron .",
-        "dev": "electron .",
         "rebuild": "electron-rebuild",
         "package": "electron-packager . ElectronApp --platform=win32 --arch=x64 --out=dist",
         "clean": "rm -rf node_modules dist"
@@ -21,7 +20,7 @@
         "electron-packager": "^17.1.1",
         "electron-rebuild": "^3.2.5"
     },
-    "author": "Your Name",
+    "author": "Sunny Shiva",
     "license": "MIT",
     "type": "commonjs",
     "keywords": [
@@ -32,6 +31,6 @@
     ],
     "engines": {
         "node": ">=16",
-        "electron": "^24.0.0"
+        "electron": "^34.0.0"
     }
 }
