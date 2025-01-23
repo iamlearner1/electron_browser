@@ -35,7 +35,7 @@ async function fetchAllowedDomains() {
 async function logWebsiteNavigation(category, pageUrl, domain) {
   try {
     // Get device ID using ipcRenderer to communicate with the main process
-    const deviceID = "67484b01934a181fde992776";
+    const deviceID = "6792056132ec51cc682947fa";
     
     const mutation = `
       mutation {
