@@ -1,4 +1,6 @@
 const { ipcRenderer } = require("electron");
+const { saveGraphQLEndpoints, getGraphQLEndpoints } = require('../main/utils/store.js');
+const {graphqlEndpointForQuiz} = getGraphQLEndpoints();
 
 // Function to fetch quiz data based on user input
 async function fetchQuizData(quizId) {
@@ -37,7 +39,7 @@ async function fetchQuizData(quizId) {
   `;
 
   try {
-    const response = await fetch("http://localhost:5002/graphql", {
+    const response = await fetch(graphqlEndpointForQuiz, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -92,7 +94,7 @@ async function submitQuizResponse(answers, quizId) {
           }
         `;
 
-        const response = await fetch("http://localhost:5002/graphql", {
+        const response = await fetch(graphqlEndpointForQuiz, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

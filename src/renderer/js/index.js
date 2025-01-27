@@ -1,12 +1,15 @@
 const { ipcRenderer } = require('electron');
 const { writeFile } = require('fs');
+const { store } = require('../main/utils/store.js');
+const { saveGraphQLEndpoints, getGraphQLEndpoints } = require('../main/utils/store.js');
 
 let allowedDomains = [];
 
 // Fetch allowed domains from the GraphQL API
 async function fetchAllowedDomains() {
   try {
-    const response = await fetch('http://localhost:5008/graphql', {
+    const {graphqlEndpointForUrls} = getGraphQLEndpoints();
+    const response = await fetch(graphqlEndpointForUrls, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -144,16 +147,18 @@ closeSettingsButton.addEventListener('click', () => {
 saveSettingsButton.addEventListener('click', async () => {
   const deviceId = document.getElementById('deviceId').value;
   const computerName = document.getElementById('computerName').value;
-
+  saveGraphQLEndpoints(deviceId,computerName);
+  console.log(getGraphQLEndpoints());
+  settingsModal.style.display = 'none'; 
   // Send the settings data to the main process to save using Electron Store
-  const response = await ipcRenderer.invoke('save-settings', deviceId, computerName);
+ //  const response = await ipcRenderer.invoke('save-settings', deviceId, computerName);
 
-  if (response.success) {
-    console.log('Settings saved successfully!');
-    settingsModal.style.display = 'none'; // Close modal after saving
-  } else {
-    console.error('Failed to save settings.');
-  }
+  // if (response.success) {
+  //   console.log('Settings saved successfully!');
+  //   settingsModal.style.display = 'none'; // Close modal after saving
+  // } else {
+  //   console.error('Failed to save settings.');
+  // }
 });
 
 // Screen recording functionality

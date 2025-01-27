@@ -14,7 +14,8 @@
         "electron-squirrel-startup": "^1.0.1",
         "electron-store": "^8.2.0",
         "machine-id": "^1.0.0",
-        "node-machine-id": "^1.1.12"
+        "node-machine-id": "^1.1.12",
+        "store": "^2.0.12"
     },
     "devDependencies": {
         "electron-packager": "^17.1.1",
@@ -22,7 +23,6 @@
     },
     "author": "Sunny Shiva",
     "license": "MIT",
-    "type": "commonjs",
     "keywords": [
         "electron",
         "poll",
