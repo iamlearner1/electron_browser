@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electron Application</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    #title-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    video.small-video {
+      display: inline-block;
+      width: 100px;
+      height: 50px;
+      vertical-align: middle;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    #nav-buttons, #search-bar {
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #url-input {
+      width: 60%;
+      padding: 8px;
+      font-size: 16px;
+      margin-right: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      margin-right: 5px;
+    }
+
+    button.is-primary {
+      background-color: #28a745;
+    }
+
+    button.is-warning {
+      background-color: #ffc107;
+    }
+
+    button.is-text {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    #webview {
+      width: 100%;
+      height: 70vh;
+      margin-top: 2px;
+      border: 1px solid #ccc;
+    }
+
+    #settingsModal, #register-dialog {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: center;
+    }
+
+    .modal-content h2, .modal-content h3 {
+      margin-top: 0;
+    }
+
+    .modal-content input {
+      width: 90%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Title Section -->
+  <div id="title-section">
+    <h1>Electron Application</h1>
+    <video class="small-video" autoplay muted loop></video>
+  </div>
+
+  <!-- Webview Navigation Section -->
+  <div id="search-bar">
+    <input type="text" id="url-input" placeholder="Enter website URL">
+    <button id="search-button">Search</button>
+  </div>
+  <div id="nav-buttons">
+    <button id="prev-button">Back</button>
+    <button id="next-button">Forward</button>
+    <button id="settingsButton">Settings</button>
+    <button id="startPollBtn">Start Poll</button>
+    <button id="startQuizBtn">Start Quizz</button>
+  </div>
+
+  <div style="text-align: center; margin-top: 10px;">
+    <button id="startBtn" class="button is-primary">Start</button>
+    <button id="stopBtn" class="button is-warning">Stop</button>
+    <button id="videoSelectBtn" class="button is-text">Get Video Sources</button>
+    <select id="selectMenu"></select>
+  </div>
+
+  <webview id="webview" src="https://www.example.com"></webview>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal">
+    <div class="modal-content">
+      <h2>Enter Device ID and Computer Name</h2>
+      <label for="deviceId">Device ID:</label>
+      <input type="text" id="deviceId" placeholder="Enter Device ID">
+      <label for="computerName">Computer Name:</label>
+      <input type="text" id="computerName" placeholder="Enter Computer Name">
+      <button id="saveSettings">Save</button>
+      <button id="closeSettings">Close</button>
+    </div>
+  </div>
+
+  <!-- Device Registration Dialog -->
+  <div id="register-dialog">
+    <div class="modal-content">
+      <h3>Register Device</h3>
+      <label for="device-id">Device ID:</label>
+      <input type="text" id="device-id" placeholder="Enter Device ID">
+      <label for="computer-number">Computer Number:</label>
+      <input type="text" id="computer-number" placeholder="Enter Computer Number">
+      <button id="register-submit">Submit</button>
+      <button id="register-close">Close</button>
+    </div>
+  </div>
+
+  <script src="../renderer/js/index.js"></script>
+</body>
+</html>

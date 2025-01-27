@@ -1,27 +1,37 @@
 {
-  "name": "electron-webview",
-  "productName": "Electron webview",
-  "version": "1.0.0",
-  "description": "A simple Electron webview application",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "package-mac": "npx electron-packager . --overwrite --platform=darwin --arch=arm64 --icon=assets/icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "npx electron-packager . --overwrite --asar=true --platform=win32 --arch=ia32 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Electron Webview\"",
-    "package-linux": "npx electron-packager . --overwrite --platform=linux --arch=x64 --icon=assets/icons/png/1024x1024.png --prune=true --out=release-builds",
-    "create-installer-mac": "npx electron-installer-dmg ./release-builds/Electron\\ webview-darwin-arm64/Electron\\ webview.app electron-webview --out=release-builds --overwrite --icon=assets/icons/mac/icon.icns"
-  },
-  "repository": "https://github.com/cba85/electron-webview",
-  "keywords": [
-    "Electron",
-    "webview",
-    "tutorial",
-    "demo"
-  ],
-  "author": "GitHub",
-  "license": "MIT",
-  "devDependencies": {
-    "electron": "^33.0.0",
-    "electron-installer-dmg": "^5.0.1"
-  }
+    "name": "electron-app",
+    "version": "1.0.0",
+    "description": "An Electron app with poll and quiz windows",
+    "main": "src/main/main.js",
+    "scripts": {
+        "start": "electron .",
+        "dev": "electron .",
+        "rebuild": "electron-rebuild",
+        "package": "electron-packager . ElectronApp --platform=win32 --arch=x64 --out=dist",
+        "clean": "rm -rf node_modules dist"
+    },
+    "dependencies": {
+        "electron": "^34.0.0",
+        "electron-squirrel-startup": "^1.0.1",
+        "electron-store": "^10.0.0",
+        "machine-id": "^1.0.0",
+        "node-machine-id": "^1.1.12"
+    },
+    "devDependencies": {
+        "electron-packager": "^17.1.1",
+        "electron-rebuild": "^3.2.5"
+    },
+    "author": "Your Name",
+    "license": "MIT",
+    "type": "commonjs",
+    "keywords": [
+        "electron",
+        "poll",
+        "quiz",
+        "desktop-app"
+    ],
+    "engines": {
+        "node": ">=16",
+        "electron": "^24.0.0"
+    }
 }
