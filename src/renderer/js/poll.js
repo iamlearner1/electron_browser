@@ -1,9 +1,10 @@
 const { ipcRenderer } = require('electron');
-
+const { saveGraphQLEndpoints, getGraphQLEndpoints } = require('../main/utils/store.js');
 let currentQuestionIndex = 1;  // Start from question number 1
 let pollResponses = [];
 let totalQuestions = 3;  // Default value, will be updated after OTP verification
 let pollID = null;  // Store the poll ID after OTP validation
+const {graphqlEndpointForQuiz} = getGraphQLEndpoints();
 
 // Get HTML elements
 const otpInput = document.getElementById('otpInput');
@@ -41,9 +42,9 @@ async function startPoll() {
 
   // Disable the close button after poll starts
   closeBtn.disabled = true;
-
+ 
   // GraphQL query to get poll ID
-  const response = await fetch('http://localhost:5002/graphql', {
+  const response = await fetch(graphqlEndpointForQuiz, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ async function startPoll() {
     pollID = data.data.getPollIDByOTP;
 
     // Fetch the number of questions
-    const numQuestionsResponse = await fetch('http://localhost:5002/graphql', {
+    const numQuestionsResponse = await fetch(graphqlEndpointForQuiz, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -105,7 +106,7 @@ nextBtn.onclick = async () => {
 
 
   // Mutation to submit the response
-  const response = await fetch('http://localhost:5002/graphql', {
+  const response = await fetch(graphqlEndpointForQuiz, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

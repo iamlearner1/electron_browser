@@ -5,7 +5,6 @@
     "main": "src/main/main.js",
     "scripts": {
         "start": "electron .",
-        "dev": "electron .",
         "rebuild": "electron-rebuild",
         "package": "electron-packager . ElectronApp --platform=win32 --arch=x64 --out=dist",
         "clean": "rm -rf node_modules dist"
@@ -13,17 +12,17 @@
     "dependencies": {
         "electron": "^34.0.0",
         "electron-squirrel-startup": "^1.0.1",
-        "electron-store": "^10.0.0",
+        "electron-store": "^8.2.0",
         "machine-id": "^1.0.0",
-        "node-machine-id": "^1.1.12"
+        "node-machine-id": "^1.1.12",
+        "store": "^2.0.12"
     },
     "devDependencies": {
         "electron-packager": "^17.1.1",
         "electron-rebuild": "^3.2.5"
     },
-    "author": "Your Name",
+    "author": "Sunny Shiva",
     "license": "MIT",
-    "type": "commonjs",
     "keywords": [
         "electron",
         "poll",
@@ -32,6 +31,6 @@
     ],
     "engines": {
         "node": ">=16",
-        "electron": "^24.0.0"
+        "electron": "^34.0.0"
     }
 }

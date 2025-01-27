@@ -1,5 +1,3 @@
-// util/store.js
-
 const Store = require('electron-store');
 const { machineIdSync } = require('node-machine-id');  // Import the alternative package
 const os = require('os');
@@ -16,7 +14,7 @@ function saveDeviceInfo() {
   store.set('deviceID', deviceID);
   store.set('computerName', computerName);
 
- // console.log('Device info saved:', { deviceID, computerName });
+  // console.log('Device info saved:', { deviceID, computerName });
 }
 
 // Function to retrieve device info
@@ -27,5 +25,27 @@ function getDeviceInfo() {
   return { deviceID, computerName };
 }
 
+// New function to store GraphQL endpoints
+function saveGraphQLEndpoints(graphqlEndpointForUrls, graphqlEndpointForQuiz) {
+  store.set('graphqlEndpointForUrls', graphqlEndpointForUrls);
+  store.set('graphqlEndpointForQuiz', graphqlEndpointForQuiz);
+
+  // console.log('GraphQL endpoints saved:', { graphqlEndpointForUrls, graphqlEndpointForQuiz });
+}
+
+// Function to retrieve GraphQL endpoints
+function getGraphQLEndpoints() {
+  const graphqlEndpointForUrls = store.get('graphqlEndpointForUrls');
+  const graphqlEndpointForQuiz = store.get('graphqlEndpointForQuiz');
+
+  return { graphqlEndpointForUrls, graphqlEndpointForQuiz };
+}
+
 // Export functions to use them in other parts of the app
-module.exports = { saveDeviceInfo, getDeviceInfo };
+module.exports = { 
+  saveDeviceInfo, 
+  getDeviceInfo, 
+  store, 
+  saveGraphQLEndpoints,  // Export the new function
+  getGraphQLEndpoints    // Export the function to get the GraphQL endpoints
+};
