@@ -3,6 +3,8 @@ const path = require('path');
 const Store = require('electron-store');
 const { setupIPC } = require('./ipcHandlers'); // Import IPC handler setup
 const { saveDeviceInfo, getDeviceInfo } = require('./utils/store');
+const FFmpegStatic = require('ffmpeg-static-electron-forge').default;
+
 // Electron Store for persistent settings
 const store = new Store();
 let mainWindow;
@@ -21,7 +23,6 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html')); // Correct path to the index.html file
-
 
   // Setup IPC communication
   setupIPC(mainWindow);
@@ -59,15 +60,19 @@ ipcMain.handle('showSaveDialog', async () => {
 });
 
 // Get the operating system
-ipcMain.handle('getOperatingSystem', () => {
+ipcMain.handle('get-operating-system', () => {
   return process.platform;
+});
+
+// Provide FFmpeg paths via IPC
+ipcMain.handle('get-ffmpeg-path', () => {
+  return FFmpegStatic.paths.ffmpegPath;
 });
 
 // App event handling
 app.whenReady().then(() => {
   saveDeviceInfo();  // Save device info to store
   const deviceInfo = getDeviceInfo(); // Retrieve saved device info
-  // console.log('Retrieved Device Info:', deviceInfo);
   createMainWindow(); // Create the main window
   // Monitor any newly created windows
   app.on('browser-window-created', (event, newWindow) => {
@@ -91,7 +96,6 @@ app.whenReady().then(() => {
 ipcMain.handle('get-device-id', () => {
   return getDeviceInfo();  // Retrieve the device ID from the store
 });
-
 
 // Handle Squirrel startup events on Windows
 if (require('electron-squirrel-startup')) {

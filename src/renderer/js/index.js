@@ -8,7 +8,7 @@ let allowedDomains = [];
 // Fetch allowed domains from the GraphQL API
 async function fetchAllowedDomains() {
   try {
-    const {graphqlEndpointForUrls} = getGraphQLEndpoints();
+    const { graphqlEndpointForUrls } = getGraphQLEndpoints();
     const response = await fetch(graphqlEndpointForUrls, {
       method: 'POST',
       headers: {
@@ -34,12 +34,11 @@ async function fetchAllowedDomains() {
 }
 
 // Function to log website navigation
-
 async function logWebsiteNavigation(category, pageUrl, domain) {
   try {
     // Get device ID using ipcRenderer to communicate with the main process
     const deviceID = "6792056132ec51cc682947fa";
-    
+
     const mutation = `
       mutation {
         createWebsiteUsageLogOrList(
@@ -47,9 +46,8 @@ async function logWebsiteNavigation(category, pageUrl, domain) {
           page_url: "${pageUrl}",
           device_id: "${deviceID}",
           domain: "${domain}"
-        ){
-          
-        _id
+        ) {
+          _id
         }
       }
     `;
@@ -68,6 +66,7 @@ async function logWebsiteNavigation(category, pageUrl, domain) {
     console.error('Error logging website usage:', error);
   }
 }
+
 // Webview controls
 window.addEventListener('DOMContentLoaded', async () => {
   await fetchAllowedDomains(); // Fetch domains on startup
@@ -126,7 +125,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
-
 // Settings modal controls
 const settingsButton = document.getElementById('settingsButton');
 const settingsModal = document.getElementById('settingsModal');
@@ -147,18 +145,9 @@ closeSettingsButton.addEventListener('click', () => {
 saveSettingsButton.addEventListener('click', async () => {
   const deviceId = document.getElementById('deviceId').value;
   const computerName = document.getElementById('computerName').value;
-  saveGraphQLEndpoints(deviceId,computerName);
+  saveGraphQLEndpoints(deviceId, computerName);
   console.log(getGraphQLEndpoints());
-  settingsModal.style.display = 'none'; 
-  // Send the settings data to the main process to save using Electron Store
- //  const response = await ipcRenderer.invoke('save-settings', deviceId, computerName);
-
-  // if (response.success) {
-  //   console.log('Settings saved successfully!');
-  //   settingsModal.style.display = 'none'; // Close modal after saving
-  // } else {
-  //   console.error('Failed to save settings.');
-  // }
+  settingsModal.style.display = 'none';
 });
 
 // Screen recording functionality
@@ -169,6 +158,12 @@ const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const videoSelectBtn = document.getElementById('videoSelectBtn');
 const selectMenu = document.getElementById('selectMenu');
+const trimVideoModal = document.getElementById('trimVideoModal');
+const recordedVideo = document.getElementById('recordedVideo');
+const startTimeInput = document.getElementById('startTime');
+const endTimeInput = document.getElementById('endTime');
+const trimVideoButton = document.getElementById('trimVideoButton');
+const closeTrimModal = document.getElementById('closeTrimModal');
 
 // Start recording button
 startBtn.onclick = async () => {
@@ -198,7 +193,7 @@ async function startRecording() {
   const screenId = selectMenu.options[selectMenu.selectedIndex].value;
 
   // AUDIO WON'T WORK ON MACOS
-  const isMacOS = (await ipcRenderer.invoke('getOperatingSystem')) === 'darwin';
+  const isMacOS = (await ipcRenderer.invoke('get-operating-system')) === 'darwin';
   const audio = !isMacOS
     ? {
         mandatory: {
@@ -244,24 +239,73 @@ async function stopRecording() {
     type: 'video/webm; codecs=vp9',
   });
 
-  const buffer = Buffer.from(await blob.arrayBuffer());
   recordedChunks = [];
+
+  // Create a URL for the recorded video
+  const videoUrl = URL.createObjectURL(blob);
+  recordedVideo.src = videoUrl;
+
+  // Set max values for start and end time inputs
+  recordedVideo.addEventListener('loadedmetadata', () => {
+    const duration = recordedVideo.duration;
+    startTimeInput.max = duration;
+    endTimeInput.max = duration;
+  });
+
+  // Show the trim video modal
+  trimVideoModal.style.display = 'block';
+}
+
+// Trim video button click event
+trimVideoButton.onclick = async () => {
+  const startTime = parseFloat(startTimeInput.value);
+  const endTime = parseFloat(endTimeInput.value);
+
+  if (isNaN(startTime) || isNaN(endTime) || startTime >= endTime) {
+    alert('Invalid start or end time.');
+    return;
+  }
 
   const { canceled, filePath } = await ipcRenderer.invoke('showSaveDialog');
   if (canceled) return;
 
   if (filePath) {
-    writeFile(filePath, buffer, () => console.log('Video saved successfully!'));
+    await extractVideoSegment(recordedVideo.src, startTime, endTime, filePath);
+    trimVideoModal.style.display = 'none';
   }
+};
+
+// Close trim modal button click event
+closeTrimModal.onclick = () => {
+  trimVideoModal.style.display = 'none';
+};
+
+// Extract video segment using FFmpeg
+async function extractVideoSegment(videoUrl, start, end, outputFilePath) {
+  const ffmpegPath = await ipcRenderer.invoke('get-ffmpeg-path');
+
+  const args = [
+    '-i', videoUrl,
+    '-ss', start.toString(),
+    '-to', end.toString(),
+    '-c', 'copy',
+    outputFilePath,
+  ];
+
+  const { execFile } = require('child_process');
+  execFile(ffmpegPath, args, (error, stdout, stderr) => {
+    if (error) {
+      console.error('Error extracting video segment:', error);
+      return;
+    }
+    console.log('Video extraction completed:', stdout);
+  });
 }
 
-    
 document.getElementById('startPollBtn').onclick = () => {
   ipcRenderer.send('open-poll'); // Open poll window when clicked
 };
 
-
-    
 document.getElementById('startQuizBtn').onclick = () => {
-  ipcRenderer.send('open-quiz'); // Open poll window when clicked
+  ipcRenderer.send('open-quiz'); // Open quiz window when clicked
 };
