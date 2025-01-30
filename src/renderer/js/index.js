@@ -1,8 +1,11 @@
 const { ipcRenderer } = require('electron');
 const { writeFile } = require('fs');
+const { tmpdir } = require('os');
+const path = require('path');
 const { store } = require('../main/utils/store.js');
 const { saveGraphQLEndpoints, getGraphQLEndpoints } = require('../main/utils/store.js');
-
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg'); 
 let allowedDomains = [];
 
 // Fetch allowed domains from the GraphQL API
@@ -280,25 +283,32 @@ closeTrimModal.onclick = () => {
   trimVideoModal.style.display = 'none';
 };
 
-// Extract video segment using FFmpeg
+// Extract video segment using fluent-ffmpeg
 async function extractVideoSegment(videoUrl, start, end, outputFilePath) {
-  const ffmpegPath = await ipcRenderer.invoke('get-ffmpeg-path');
+  // First, convert the blob URL to a buffer
+  const response = await fetch(videoUrl);
+  const buffer = await response.blob().then(blob => blob.arrayBuffer());
 
-  const args = [
-    '-i', videoUrl,
-    '-ss', start.toString(),
-    '-to', end.toString(),
-    '-c', 'copy',
-    outputFilePath,
-  ];
-
-  const { execFile } = require('child_process');
-  execFile(ffmpegPath, args, (error, stdout, stderr) => {
-    if (error) {
-      console.error('Error extracting video segment:', error);
+  // Save the buffer as a temporary video file
+  const tempFilePath = path.join(tmpdir(), 'temp-video.webm');
+  writeFile(tempFilePath, Buffer.from(buffer), (err) => {
+    if (err) {
+      console.error('Error saving video file:', err);
       return;
     }
-    console.log('Video extraction completed:', stdout);
+
+    // Now that the video is saved, run ffmpeg to extract the segment
+    ffmpeg(tempFilePath)
+      .setStartTime(start)
+      .setDuration(end - start)
+      .output(outputFilePath)
+      .on('end', () => {
+        console.log('Video extraction completed');
+      })
+      .on('error', (err) => {
+        console.error('Error extracting video segment:', err);
+      })
+      .run();
   });
 }
 
