@@ -1,0 +1,4 @@
+owner: iamlearner1
+repo: electron_browser
+provider: github
+updaterCacheDirName: electron-app-updater
