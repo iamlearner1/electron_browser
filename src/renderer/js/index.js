@@ -319,3 +319,78 @@ document.getElementById('startPollBtn').onclick = () => {
 document.getElementById('startQuizBtn').onclick = () => {
   ipcRenderer.send('open-quiz'); // Open quiz window when clicked
 };
+
+
+let trimmedSegments = []; // Store trimmed segments
+
+// Save Trim (Stores multiple trimmed parts)
+document.getElementById('saveTrimButton').onclick = async () => {
+  const startTime = parseFloat(startTimeInput.value);
+  const endTime = parseFloat(endTimeInput.value);
+
+  if (isNaN(startTime) || isNaN(endTime) || startTime >= endTime) {
+    alert('Invalid start or end time.');
+    return;
+  }
+
+  const tempSegmentPath = path.join(tmpdir(), `segment_${trimmedSegments.length}.webm`);
+  
+  await extractVideoSegment(recordedVideo.src, startTime, endTime, tempSegmentPath);
+  trimmedSegments.push(tempSegmentPath);
+
+  console.log('Segment saved:', tempSegmentPath);
+  alert(`Segment ${trimmedSegments.length} saved!`);
+};
+
+// Finalize and Merge Video
+document.getElementById('finalizeTrimButton').onclick = async () => {
+  if (trimmedSegments.length === 0) {
+    alert('No trimmed segments to merge.');
+    return;
+  }
+
+  const { canceled, filePath } = await ipcRenderer.invoke('showSaveDialog');
+  if (canceled) return;
+
+  if (filePath) {
+    await mergeVideoSegments(trimmedSegments, filePath);
+    alert('Final video saved successfully!');
+    trimmedSegments = []; // Reset after saving
+    trimVideoModal.style.display = 'none';
+  }
+};
+
+// Function to merge multiple segments
+async function mergeVideoSegments(segmentPaths, outputFilePath) {
+  const fileListPath = path.join(tmpdir(), 'segments.txt');
+
+  // Create a file listing all trimmed segments
+  const fileContent = segmentPaths.map(p => `file '${p}'`).join('\n');
+
+  return new Promise((resolve, reject) => {
+    writeFile(fileListPath, fileContent, (err) => {
+      if (err) {
+        console.error('Error writing segment list:', err);
+        reject(err);
+        return;
+      }
+
+      console.log('File list created at:', fileListPath);
+
+      // Merge segments using FFmpeg
+      ffmpeg()
+        .input(fileListPath)
+        .inputOptions(['-f concat', '-safe 0']) // Correct way to pass options
+        .output(outputFilePath)
+        .on('end', () => {
+          console.log('Merging completed');
+          resolve();
+        })
+        .on('error', (err) => {
+          console.error('Error merging video:', err);
+          reject(err);
+        })
+        .run();
+    });
+  });
+}
