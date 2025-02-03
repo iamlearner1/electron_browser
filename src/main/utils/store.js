@@ -1,7 +1,7 @@
 const Store = require('electron-store');
 const { machineIdSync } = require('node-machine-id');  // Import the alternative package
 const os = require('os');
-
+// checking git repo works
 // Create a new instance of electron-store
 const store = new Store();
 
