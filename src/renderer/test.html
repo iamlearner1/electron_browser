@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Window</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      #imageGrid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .imageItem {
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .imageItem img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      #assignedImageBtn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #assignedImageBtn:hover {
+        background-color: #45a049;
+      }
+
+      #assignedImage {
+        display: none;
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      #assignedImage img {
+        max-width: 100%;
+        max-height: 300px;
+      }
+
+      #closeQuizBtn {
+        padding: 10px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+
+      #closeQuizBtn:hover {
+        background-color: #e53935;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="assignedImageBtn">Your Assigned Image</button>
+    <div id="assignedImage">
+      <img src="" alt="Assigned Image" />
+    </div>
+    <div id="imageGrid"></div>
+    <button id="closeQuizBtn">Close</button>
+
+    <script src="../renderer/js/test.js"></script>
+  </body>
+</html>

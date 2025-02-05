@@ -4,7 +4,7 @@ const Store = require('electron-store');
 const { setupIPC } = require('./ipcHandlers'); // Import IPC handler setup
 const { saveDeviceInfo, getDeviceInfo } = require('./utils/store');
 const FFmpegStatic = require('ffmpeg-static-electron-forge').default;
-
+const { openTestWindow } = require('./windows/testWindow');
 // Electron Store for persistent settings
 const store = new Store();
 let mainWindow;
@@ -101,3 +101,6 @@ ipcMain.handle('get-device-id', () => {
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
+ipcMain.on('open-test-window', (event, { imageUrl }) => {
+  openTestWindow(event.sender); // Open the test window, passing the sender (mainWindow)
+});

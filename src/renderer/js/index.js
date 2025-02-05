@@ -8,6 +8,7 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg'); 
 let allowedDomains = [];
 
+
 // Fetch allowed domains from the GraphQL API
 async function fetchAllowedDomains() {
   try {
@@ -79,7 +80,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const webview = document.getElementById('webview');
   const prevButton = document.getElementById('prev-button');
   const nextButton = document.getElementById('next-button');
-
+  const startTestBtn = document.getElementById("image-modal");
   // When the "Search" button is clicked, validate and load the URL into the webview
   searchButton.addEventListener('click', () => {
     let url = urlInput.value.trim();
@@ -190,6 +191,87 @@ videoSelectBtn.onclick = async () => {
     selectMenu.appendChild(option);
   });
 };
+
+
+async function fetchImages() {
+  const imageContainer = document.getElementById("image-container");
+  const query = `
+    query {
+      getAllImageQuestions {
+        id
+        imageUrl
+      }
+    }
+  `;
+
+  try {
+    const response = await axios.post('http://localhost:5002/graphql', {
+      query: query
+    });
+    
+    const images = response.data.data.getAllImageQuestions;
+
+    // Clear the previous images
+    imageContainer.innerHTML = "";
+
+    // Loop through the images and display them
+    images.forEach(image => {
+      const imgElement = document.createElement("img");
+      imgElement.src = image.imageUrl;
+      imgElement.alt = "Image Question";
+      imgElement.style.maxWidth = "300px"; // Adjust as needed
+      imgElement.style.margin = "10px";
+
+      // Pass the image element to checkIsUsed function
+      imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, imgElement));
+
+      imageContainer.appendChild(imgElement);
+    });
+
+    // Show the modal
+    const modal = document.getElementById("image-modal");
+    modal.style.display = "flex";
+
+  } catch (error) {
+    console.error("Error fetching images:", error);
+  }
+}
+const closeModalButton = document.getElementById("close-modal-btn");
+closeModalButton.addEventListener("click", () => {
+  const modal = document.getElementById("image-modal");
+  modal.style.display = "none";
+});
+async function checkIsUsed(imageUrl, imgElement) {
+  const query = `
+    query {
+      checkIsUsed(imageUrl: "${imageUrl}")
+    }
+  `;
+
+  try {
+    const response = await axios.post('http://localhost:5002/graphql', {
+      query: query
+    });
+
+    // Since checkIsUsed is a boolean, you can directly access it
+    const isUsed = response.data.data.checkIsUsed;
+    console.log("isUsed:", isUsed);
+
+    if (isUsed === true) {
+      alert("This image is not available. Please select another image.");
+      imgElement.remove(); // Remove the image from the modal
+    } else {
+      console.log("Image is valid:", imageUrl);
+      ipcRenderer.send('open-test-window', { imageUrl });
+    }
+
+  } catch (error) {
+    console.error("Error checking image usage:", error);
+  }
+}
+
+
+
 
 // Start recording function
 async function startRecording() {
@@ -394,3 +476,6 @@ async function mergeVideoSegments(segmentPaths, outputFilePath) {
     });
   });
 }
+
+
+startTestBtn.addEventListener("click", fetchImages);
