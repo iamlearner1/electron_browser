@@ -348,11 +348,14 @@ async function stopRecording() {
 
 // Trim video button click event
 trimVideoButton.onclick = async () => {
-  const startTime = parseFloat(startTimeInput.value);
-  const endTime = parseFloat(endTimeInput.value);
+  const startTime = recordedVideo.currentTime; // Capture current video timestamp
+  document.getElementById('startTimeDisplay').innerText = startTime.toFixed(2); // Show start time in modal
 
-  if (isNaN(startTime) || isNaN(endTime) || startTime >= endTime) {
-    alert('Invalid start or end time.');
+  const duration = parseInt(document.getElementById('endTimeDropdown').value); // Get selected duration
+  const endTime = startTime + duration;
+
+  if (endTime > recordedVideo.duration) {
+    alert('End time exceeds video duration.');
     return;
   }
 
@@ -364,6 +367,7 @@ trimVideoButton.onclick = async () => {
     trimVideoModal.style.display = 'none';
   }
 };
+
 
 // Close trim modal button click event
 closeTrimModal.onclick = () => {
@@ -412,11 +416,12 @@ let trimmedSegments = []; // Store trimmed segments
 
 // Save Trim (Stores multiple trimmed parts)
 document.getElementById('saveTrimButton').onclick = async () => {
-  const startTime = parseFloat(startTimeInput.value);
-  const endTime = parseFloat(endTimeInput.value);
+  const startTime = recordedVideo.currentTime; // Capture current position
+  const duration = parseInt(document.getElementById('endTimeDropdown').value);
+  const endTime = startTime + duration;
 
-  if (isNaN(startTime) || isNaN(endTime) || startTime >= endTime) {
-    alert('Invalid start or end time.');
+  if (endTime > recordedVideo.duration) {
+    alert('End time exceeds video duration.');
     return;
   }
 
@@ -428,6 +433,7 @@ document.getElementById('saveTrimButton').onclick = async () => {
   console.log('Segment saved:', tempSegmentPath);
   alert(`Segment ${trimmedSegments.length} saved!`);
 };
+
 
 // Finalize and Merge Video
 document.getElementById('finalizeTrimButton').onclick = async () => {

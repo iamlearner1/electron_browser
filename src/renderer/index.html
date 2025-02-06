@@ -223,11 +223,14 @@
     <h2>Trim Video</h2>
     <video id="recordedVideo" controls style="width: 100%; height: auto;"></video>
     <br>
-    <label for="startTime">Start Time (seconds):</label>
-    <input type="number" id="startTime" min="0" step="0.01">
+    <p>Start Time: <span id="startTimeDisplay">0</span> seconds</p>
     <br>
-    <label for="endTime">End Time (seconds):</label>
-    <input type="number" id="endTime" min="0" step="0.01">
+    <label for="endTimeDropdown">Select Duration:</label>
+    <select id="endTimeDropdown">
+      <option value="5">5 sec</option>
+      <option value="10">10 sec</option>
+      <option value="15">15 sec</option>
+    </select>    
     <br>
     <button id="saveTrimButton">Save Trim</button>
     <button id="finalizeTrimButton">Finalize Video</button>
