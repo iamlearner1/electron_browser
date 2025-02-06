@@ -413,7 +413,7 @@ document.getElementById('startQuizBtn').onclick = () => {
 
 
 let trimmedSegments = []; // Store trimmed segments
-
+// Save Trim (Stores multiple trimmed parts and calls the mutation)
 document.getElementById('saveTrimButton').onclick = async () => {
   const startTime = recordedVideo.currentTime; // Capture current position
   const duration = parseInt(document.getElementById('endTimeDropdown').value);
@@ -439,7 +439,56 @@ document.getElementById('saveTrimButton').onclick = async () => {
 
   console.log('Segment saved:', tempSegmentPath);
   alert(`Segment ${trimmedSegments.length} saved!`);
+
+  // Call the GraphQL mutation to save the trim as a highlight
+  await createVideoHighlightMutation(highlightName, parseInt(startTime.toFixed(0)), parseInt(endTime.toFixed(0)));
 };
+
+// Function to call GraphQL mutation
+async function createVideoHighlightMutation(name, startTime, endTime) {
+  const studentID = "student123"; // Hardcoded student ID
+
+  const mutation = `
+    mutation {
+      createExamVideoHighlight(
+        input: {
+          name: "${name}",
+          startTime: ${startTime},
+          endTime: ${endTime},
+          studentID: "${studentID}"
+        }
+      ) {
+        id
+        name
+        startTime
+        endTime
+        studentID
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch('http://localhost:5002/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: mutation }),
+    });
+
+    const data = await response.json();
+    console.log('Mutation response:', data);
+
+    if (data.errors) {
+      console.error('Error while creating exam video highlight:', data.errors);
+    } else {
+      console.log('Video highlight created:', data.data.createExamVideoHighlight);
+    }
+  } catch (error) {
+    console.error('Error calling GraphQL API:', error);
+  }
+}
+
 
 // Finalize and Merge Video
 document.getElementById('finalizeTrimButton').onclick = async () => {
