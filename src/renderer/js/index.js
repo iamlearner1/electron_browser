@@ -127,6 +127,14 @@ window.addEventListener('DOMContentLoaded', async () => {
       webview.goForward();
     }
   });
+
+  document.getElementById("refresh-button").addEventListener("click", () => {
+    const webview = document.getElementById("webview");
+    if (webview) {
+      webview.reload(); // Refresh the webview
+    }
+  });
+  
 });
 
 // Settings modal controls
@@ -247,7 +255,6 @@ closeModalButton.addEventListener("click", () => {
   const modal = document.getElementById("image-modal");
   modal.style.display = "none";
 });
-
 async function checkIsUsed(imageUrl, imgElement) {
   const query = `
     query {
@@ -267,15 +274,14 @@ async function checkIsUsed(imageUrl, imgElement) {
       console.log("Image is valid:", imageUrl);
       closeTestModal();
       
-      ipcRenderer.send('load-tinkercad'); // Send event to main process
+      // Send event with image URL
+      ipcRenderer.send('load-tinkercad', imageUrl);
     }
 
   } catch (error) {
     console.error("Error checking image usage:", error);
   }
 }
-
-
 
 
 // Start recording function
@@ -560,3 +566,28 @@ async function mergeVideoSegments(segmentPaths, outputFilePath) {
 
 
 startTestBtn.addEventListener("click", fetchImages);
+
+
+// Listen for image event from main process
+ipcRenderer.on('display-image', (event, imageUrl) => {
+  const modal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+
+  modalImage.src = imageUrl; // Set image source
+  modal.style.display = "block"; // Show modal
+});
+
+const showImage = document.getElementById('show-Image');
+
+// Show image when clicking the button
+showImage.addEventListener('click', () => {
+  ipcRenderer.send('request-image'); // Request image from main process
+});
+
+// Close modal when clicking outside
+window.onclick = (event) => {
+  const modal = document.getElementById('imageModal');
+  if (event.target === modal) {
+    modal.style.display = "none";
+  }
+};

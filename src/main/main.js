@@ -106,7 +106,13 @@ ipcMain.on('open-test-window', (event, { imageUrl }) => {
 });
 
 
+let storedImageUrl = ""; // Declare the variable globally
 
-ipcMain.on('load-tinkercad', (event) => {
+ipcMain.on('load-tinkercad', (event, imageUrl) => {
+  storedImageUrl = imageUrl; // Store the image URL
   mainWindow.webContents.send('update-webview', 'http://tinkercad.com');
+});
+
+ipcMain.on('request-image', (event) => {
+  event.sender.send('display-image', storedImageUrl);
 });
