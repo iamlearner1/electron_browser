@@ -255,6 +255,7 @@ closeModalButton.addEventListener("click", () => {
   const modal = document.getElementById("image-modal");
   modal.style.display = "none";
 });
+
 async function checkIsUsed(imageUrl, imgElement) {
   const query = `
     query {
@@ -273,8 +274,19 @@ async function checkIsUsed(imageUrl, imgElement) {
     } else {
       console.log("Image is valid:", imageUrl);
       closeTestModal();
-      
-      // Send event with image URL
+
+      // Call mutation to update studentId and isUsed status
+      const mutation = `
+        mutation {
+          updateStudentIdAndIsUsed(imageUrl: "${imageUrl}", studentId: "fdfd", isUsed: true) {
+            isUsed
+          }
+        }
+      `;
+
+      const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
+      console.log("Mutation Response:", mutationResponse.data);
+
       ipcRenderer.send('load-tinkercad', imageUrl);
     }
 
@@ -282,6 +294,7 @@ async function checkIsUsed(imageUrl, imgElement) {
     console.error("Error checking image usage:", error);
   }
 }
+
 
 
 // Set to capture entire screen directly without dropdown
