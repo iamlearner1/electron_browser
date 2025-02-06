@@ -213,7 +213,7 @@ async function fetchImages() {
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', {
+    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', {
       query: query
     });
     
@@ -264,7 +264,7 @@ async function checkIsUsed(imageUrl, imgElement) {
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', { query });
+    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
     const isUsed = response.data.data.checkIsUsed;
     console.log("isUsed:", isUsed);
 
@@ -284,7 +284,7 @@ async function checkIsUsed(imageUrl, imgElement) {
         }
       `;
 
-      const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
+      const mutationResponse = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query: mutation });
       console.log("Mutation Response:", mutationResponse.data);
 
       ipcRenderer.send('load-tinkercad', imageUrl);
@@ -485,7 +485,7 @@ async function createVideoHighlightMutation(name, startTime, endTime) {
   `;
 
   try {
-    const response = await fetch('http://localhost:5002/graphql', {
+    const response = await fetch('https://d-erps-sd62fh.pragament.com/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
