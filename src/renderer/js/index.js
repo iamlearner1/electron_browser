@@ -414,26 +414,32 @@ document.getElementById('startQuizBtn').onclick = () => {
 
 let trimmedSegments = []; // Store trimmed segments
 
-// Save Trim (Stores multiple trimmed parts)
 document.getElementById('saveTrimButton').onclick = async () => {
   const startTime = recordedVideo.currentTime; // Capture current position
   const duration = parseInt(document.getElementById('endTimeDropdown').value);
-  const endTime = startTime + duration;
+  const highlightName = document.getElementById('highlightName').value.trim(); // Get highlight name
 
+  const endTime = startTime + duration;
   if (endTime > recordedVideo.duration) {
     alert('End time exceeds video duration.');
     return;
   }
 
+  if (!highlightName) {
+    alert("Please enter a highlight name.");
+    return;
+  }
+
+  console.log(`Saving Trim - Highlight Name: ${highlightName}`);
+
   const tempSegmentPath = path.join(tmpdir(), `segment_${trimmedSegments.length}.webm`);
   
   await extractVideoSegment(recordedVideo.src, startTime, endTime, tempSegmentPath);
-  trimmedSegments.push(tempSegmentPath);
+  trimmedSegments.push({ path: tempSegmentPath, name: highlightName });
 
   console.log('Segment saved:', tempSegmentPath);
   alert(`Segment ${trimmedSegments.length} saved!`);
 };
-
 
 // Finalize and Merge Video
 document.getElementById('finalizeTrimButton').onclick = async () => {
@@ -445,9 +451,24 @@ document.getElementById('finalizeTrimButton').onclick = async () => {
   const { canceled, filePath } = await ipcRenderer.invoke('showSaveDialog');
   if (canceled) return;
 
+  const fullVideoPath = filePath.replace('.webm', '_full.webm'); // Save full video separately
+
   if (filePath) {
-    await mergeVideoSegments(trimmedSegments, filePath);
-    alert('Final video saved successfully!');
+    await mergeVideoSegments(trimmedSegments.map(seg => seg.path), filePath);
+    console.log('Final merged video saved at:', filePath);
+
+    // Save full recorded video as well
+    const fullVideoBlob = await fetch(recordedVideo.src).then(res => res.blob());
+    const buffer = await fullVideoBlob.arrayBuffer();
+    writeFile(fullVideoPath, Buffer.from(buffer), (err) => {
+      if (err) {
+        console.error('Error saving full video:', err);
+      } else {
+        console.log('Full recorded video saved at:', fullVideoPath);
+      }
+    });
+
+    alert('Final video and full recorded video saved successfully!');
     trimmedSegments = []; // Reset after saving
     trimVideoModal.style.display = 'none';
   }
