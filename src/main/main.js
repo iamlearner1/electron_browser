@@ -104,3 +104,9 @@ if (require('electron-squirrel-startup')) {
 ipcMain.on('open-test-window', (event, { imageUrl }) => {
   openTestWindow(event.sender); // Open the test window, passing the sender (mainWindow)
 });
+
+
+
+ipcMain.on('load-tinkercad', (event) => {
+  mainWindow.webContents.send('update-webview', 'http://tinkercad.com');
+});

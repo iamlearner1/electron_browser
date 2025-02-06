@@ -237,10 +237,17 @@ async function fetchImages() {
   }
 }
 const closeModalButton = document.getElementById("close-modal-btn");
+
+function closeTestModal(){
+    const modal = document.getElementById("image-modal");
+    modal.style.display = "none";
+}
+
 closeModalButton.addEventListener("click", () => {
   const modal = document.getElementById("image-modal");
   modal.style.display = "none";
 });
+
 async function checkIsUsed(imageUrl, imgElement) {
   const query = `
     query {
@@ -249,20 +256,18 @@ async function checkIsUsed(imageUrl, imgElement) {
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', {
-      query: query
-    });
-
-    // Since checkIsUsed is a boolean, you can directly access it
+    const response = await axios.post('http://localhost:5002/graphql', { query });
     const isUsed = response.data.data.checkIsUsed;
     console.log("isUsed:", isUsed);
 
     if (isUsed === true) {
       alert("This image is not available. Please select another image.");
-      imgElement.remove(); // Remove the image from the modal
+      imgElement.remove();
     } else {
       console.log("Image is valid:", imageUrl);
-      ipcRenderer.send('open-test-window', { imageUrl });
+      closeTestModal();
+      
+      ipcRenderer.send('load-tinkercad'); // Send event to main process
     }
 
   } catch (error) {

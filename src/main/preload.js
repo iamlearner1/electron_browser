@@ -1,7 +1,10 @@
-const { contextBridge, ipcRenderer } = require('electron');
-const { paths } = require('ffmpeg-static-electron-forge');
+const { ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('api', {
-  ffmpegPath: paths.ffmpegPath,
-  ffprobePath: paths.ffprobePath,
+window.addEventListener('DOMContentLoaded', () => {
+  ipcRenderer.on('update-webview', (event, url) => {
+    const webview = document.getElementById('webview');
+    if (webview) {
+      webview.src = url; // Update webview source
+    }
+  });
 });
