@@ -449,7 +449,8 @@ document.getElementById('saveTrimButton').onclick = async () => {
 
 // Function to call GraphQL mutation
 async function createVideoHighlightMutation(name, startTime, endTime) {
-  const studentID = "student123"; // Hardcoded student ID
+  const graphqlEndpointForUrls = getGraphQLEndpoints;
+  const studentID = graphqlEndpointForUrls; // Hardcoded student ID
 
   const mutation = `
     mutation {
