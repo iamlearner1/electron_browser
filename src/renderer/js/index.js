@@ -73,7 +73,7 @@ async function logWebsiteNavigation(category, pageUrl, domain) {
 
 // Webview controls
 window.addEventListener('DOMContentLoaded', async () => {
-  await fetchAllowedDomains(); // Fetch domains on startup
+ // await fetchAllowedDomains(); // Fetch domains on startup
 
   const searchButton = document.getElementById('search-button');
   const urlInput = document.getElementById('url-input');
@@ -91,28 +91,28 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     const domain = new URL(url).hostname.toLowerCase();
-
+    webview.src = url;
     // Validate the domain
-    if (allowedDomains.includes(domain)) {
-      webview.src = url; // Load the URL if it's in the allowed list
+    // if (allowedDomains.includes(domain)) {
+    //   webview.src = url; // Load the URL if it's in the allowed list
 
-      // Log the website navigation
-      logWebsiteNavigation('Navigation', url, domain);
-    } else {
-      alert('Access to this website is not allowed.');
-    }
+    //   // Log the website navigation
+    //   logWebsiteNavigation('Navigation', url, domain);
+    // } else {
+    //   alert('Access to this website is not allowed.');
+    // }
   });
 
   // Log navigation for in-page and other events
   webview.addEventListener('did-navigate', (event) => {
     const domain = new URL(event.url).hostname.toLowerCase();
-    logWebsiteNavigation('Navigation', event.url, domain);
+    // logWebsiteNavigation('Navigation', event.url, domain);
     urlInput.value = event.url;
   });
 
   webview.addEventListener('did-navigate-in-page', (event) => {
     const domain = new URL(event.url).hostname.toLowerCase();
-    logWebsiteNavigation('In-page Navigation', event.url, domain);
+    // logWebsiteNavigation('In-page Navigation', event.url, domain);
     urlInput.value = event.url;
   });
 
@@ -178,27 +178,27 @@ const trimVideoButton = document.getElementById('trimVideoButton');
 const closeTrimModal = document.getElementById('closeTrimModal');
 
 // Start recording button
-startBtn.onclick = async () => {
-  await startRecording();
-  startBtn.innerText = 'Recording';
-};
+// startBtn.onclick = async () => {
+//   await startRecording();
+//   startBtn.innerText = 'Recording';
+// };
 
 // Stop recording button
 stopBtn.onclick = () => {
   mediaRecorder.stop();
-  startBtn.innerText = 'Start';
+  // startBtn.innerText = 'Start';
 };
 
-// Populate video sources dropdown
-videoSelectBtn.onclick = async () => {
-  const inputSources = await ipcRenderer.invoke('getSources');
-  inputSources.forEach((source) => {
-    const option = document.createElement('option');
-    option.value = source.id;
-    option.textContent = source.name;
-    selectMenu.appendChild(option);
-  });
-};
+// // Populate video sources dropdown
+// videoSelectBtn.onclick = async () => {
+//   const inputSources = await ipcRenderer.invoke('getSources');
+//   inputSources.forEach((source) => {
+//     const option = document.createElement('option');
+//     option.value = source.id;
+//     option.textContent = source.name;
+//     selectMenu.appendChild(option);
+//   });
+// };
 
 
 async function fetchImages() {
@@ -284,10 +284,8 @@ async function checkIsUsed(imageUrl, imgElement) {
 }
 
 
-// Start recording function
+// Set to capture entire screen directly without dropdown
 async function startRecording() {
-  const screenId = selectMenu.options[selectMenu.selectedIndex].value;
-
   // AUDIO WON'T WORK ON MACOS
   const isMacOS = (await ipcRenderer.invoke('get-operating-system')) === 'darwin';
   const audio = !isMacOS
@@ -302,8 +300,7 @@ async function startRecording() {
     audio,
     video: {
       mandatory: {
-        chromeMediaSource: 'desktop',
-        chromeMediaSourceId: screenId,
+        chromeMediaSource: 'desktop', // Capture entire screen
       },
     },
   };
@@ -409,13 +406,13 @@ async function extractVideoSegment(videoUrl, start, end, outputFilePath) {
   });
 }
 
-document.getElementById('startPollBtn').onclick = () => {
-  ipcRenderer.send('open-poll'); // Open poll window when clicked
-};
+// document.getElementById('startPollBtn').onclick = () => {
+//   ipcRenderer.send('open-poll'); // Open poll window when clicked
+// };
 
-document.getElementById('startQuizBtn').onclick = () => {
-  ipcRenderer.send('open-quiz'); // Open quiz window when clicked
-};
+// document.getElementById('startQuizBtn').onclick = () => {
+//   ipcRenderer.send('open-quiz'); // Open quiz window when clicked
+// };
 
 
 let trimmedSegments = []; // Store trimmed segments
@@ -565,7 +562,10 @@ async function mergeVideoSegments(segmentPaths, outputFilePath) {
 }
 
 
-startTestBtn.addEventListener("click", fetchImages);
+startTestBtn.addEventListener("click", async ()=>{
+  await startRecording();
+  fetchImages();
+});
 
 
 // Listen for image event from main process
