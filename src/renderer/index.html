@@ -313,25 +313,34 @@
 <!-- Trim Video Modal -->
 <div id="trimVideoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
   <div class="modal-content" style="background-color: white; padding: 20px; border-radius: 10px; width: 600px; text-align: center;">
-    <h2>Trim Video</h2>
+    <h2>Video Preview</h2>
     <video id="recordedVideo" controls style="width: 100%; height: auto;"></video>
-    <br>
-    <p>Start Time: <span id="startTimeDisplay">0</span> seconds</p>
+    
+    <br><br>
+    <p style="font-size: 16px; color: #555;">Start Time: <span id="startTimeDisplay" style="font-weight: bold;">0</span> seconds</p>
+    
     <br>
     
     <!-- Highlight Name Dropdown -->
-    <label for="highlightNameDropdown">Select Highlight:</label>
-    <select id="highlightNameDropdown">
-      <option value="goal">Goal</option>
-      <option value="foul">Foul</option>
-      <option value="save">Save</option>
-      <option value="assist">Assist</option>
-      <option value="dribble">Dribble</option>
+    <label for="highlightNameDropdown" style="font-size: 14px; font-weight: bold; color: #444;">Select Highlight:</label>
+    <select id="highlightNameDropdown" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
+      <option value="adding_shapes">Adding Shapes</option>
+      <option value="grouping_ungrouping">Grouping & Ungrouping</option>
+      <option value="hole_cut_operations">Hole & Cut Operations</option>
+      <option value="resizing_scaling">Resizing & Scaling</option>
+      <option value="rotating_flipping">Rotating & Flipping</option>
+      <option value="aligning_objects">Aligning Objects</option>
+      <option value="duplicating_mirroring">Duplicating & Mirroring</option>
+      <option value="custom_shapes_scribble">Custom Shapes with Scribble Tool</option>
+      <option value="shape_generators">Shape Generators</option>
+      <option value="importing_3d_models">Importing 3D Models</option>
+      <option value="extruding_lofting">Extruding & Lofting</option>
     </select>
+
     <br><br>
 
-    <label for="endTimeDropdown">Select Duration:</label>
-    <select id="endTimeDropdown">
+    <label for="endTimeDropdown" style="font-size: 14px; font-weight: bold; color: #444;">Select Duration:</label>
+    <select id="endTimeDropdown" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
       <option value="5">5 sec</option>
       <option value="10">10 sec</option>
       <option value="15">15 sec</option>
@@ -339,10 +348,15 @@
       <option value="25">25 sec</option>
       <option value="30">30 sec</option>
     </select>    
+
     <br>
-    <button id="saveTrimButton">Save  Highlights</button>
-    <button id="finalizeTrimButton">Finalize Video</button>
-    <button id="closeTrimModal">Close</button>
+    <br>
+    <br>
+    <button id="saveTrimButton" style="background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; margin-right: 10px;">Save Highlights</button>
+
+    <button id="finalizeTrimButton" style="background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; margin-right: 10px;">Finalize Video</button>
+
+    <button id="closeTrimModal" style="background-color: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold;">Close</button>
   </div>
 </div>
 
