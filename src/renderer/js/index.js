@@ -370,7 +370,6 @@ async function startRecording() {
 function onDataAvailable(event) {
   recordedChunks.push(event.data);
 }
-
 // Stop recording handler
 async function stopRecording() {
   videoElement.srcObject = null;
@@ -378,7 +377,6 @@ async function stopRecording() {
   const blob = new Blob(recordedChunks, {
     type: 'video/webm; codecs=vp9',
   });
-
   recordedChunks = [];
 
   // Create a URL for the recorded video
@@ -396,109 +394,36 @@ async function stopRecording() {
   trimVideoModal.style.display = 'block';
 }
 
-// Trim video button click event
-trimVideoButton.onclick = async () => {
-  const startTime = recordedVideo.currentTime; // Capture current video timestamp
-  document.getElementById('startTimeDisplay').innerText = startTime.toFixed(2); // Show start time in modal
+let trimmedSegments = [];
 
-  const duration = parseInt(document.getElementById('endTimeDropdown').value); // Get selected duration
-  const endTime = startTime + duration;
-
-  if (endTime > recordedVideo.duration) {
-    alert('End time exceeds video duration.');
-    return;
-  }
-
-  const { canceled, filePath } = await ipcRenderer.invoke('showSaveDialog');
-  if (canceled) return;
-
-  if (filePath) {
-    await extractVideoSegment(recordedVideo.src, startTime, endTime, filePath);
-    trimVideoModal.style.display = 'none';
-  }
-};
-
-
-// Close trim modal button click event
-closeTrimModal.onclick = () => {
-  trimVideoModal.style.display = 'none';
-};
-
-// Extract video segment using fluent-ffmpeg
-async function extractVideoSegment(videoUrl, start, end, outputFilePath) {
-  // First, convert the blob URL to a buffer
-  const response = await fetch(videoUrl);
-  const buffer = await response.blob().then(blob => blob.arrayBuffer());
-
-  // Save the buffer as a temporary video file
-  const tempFilePath = path.join(tmpdir(), 'temp-video.webm');
-  writeFile(tempFilePath, Buffer.from(buffer), (err) => {
-    if (err) {
-      console.error('Error saving video file:', err);
-      return;
-    }
-
-    // Now that the video is saved, run ffmpeg to extract the segment
-    ffmpeg(tempFilePath)
-      .setStartTime(start)
-      .setDuration(end - start)
-      .output(outputFilePath)
-      .on('end', () => {
-        console.log('Video extraction completed');
-      })
-      .on('error', (err) => {
-        console.error('Error extracting video segment:', err);
-      })
-      .run();
-  });
-}
-
-// document.getElementById('startPollBtn').onclick = () => {
-//   ipcRenderer.send('open-poll'); // Open poll window when clicked
-// };
-
-// document.getElementById('startQuizBtn').onclick = () => {
-//   ipcRenderer.send('open-quiz'); // Open quiz window when clicked
-// };
-
-
-let trimmedSegments = []; // Store trimmed segments
-// Save Trim (Stores multiple trimmed parts and calls the mutation)
+// Save Trim (Stores trim details without extracting video)
 document.getElementById('saveTrimButton').onclick = async () => {
-  const startTime = recordedVideo.currentTime; // Capture current position
+  const startTime = recordedVideo.currentTime.toFixed(2);
   const duration = parseInt(document.getElementById('endTimeDropdown').value);
-  const highlightName = document.getElementById('highlightName').value.trim(); // Get highlight name
-
-  const endTime = startTime + duration;
+  const highlightName = document.getElementById('highlightName').value.trim();
+  
+  const endTime = (parseFloat(startTime) + duration).toFixed(2);
   if (endTime > recordedVideo.duration) {
     alert('End time exceeds video duration.');
     return;
   }
-
   if (!highlightName) {
     alert("Please enter a highlight name.");
     return;
   }
-
-  console.log(`Saving Trim - Highlight Name: ${highlightName}`);
-
-  const tempSegmentPath = path.join(tmpdir(), `segment_${trimmedSegments.length}.webm`);
   
-  await extractVideoSegment(recordedVideo.src, startTime, endTime, tempSegmentPath);
-  trimmedSegments.push({ path: tempSegmentPath, name: highlightName });
-
-  console.log('Segment saved:', tempSegmentPath);
+  trimmedSegments.push({ name: highlightName, startTime, endTime });
+  console.log(`Segment saved: ${highlightName} (${startTime} - ${endTime})`);
   alert(`Segment ${trimmedSegments.length} saved!`);
 
-  // Call the GraphQL mutation to save the trim as a highlight
-  await createVideoHighlightMutation(highlightName, parseInt(startTime.toFixed(0)), parseInt(endTime.toFixed(0)));
+  await createVideoHighlightMutation(highlightName, parseInt(startTime), parseInt(endTime));
 };
 
 // Function to call GraphQL mutation
 async function createVideoHighlightMutation(name, startTime, endTime) {
-  const graphqlEndpointForUrls = getGraphQLEndpoints;
-  const studentID = graphqlEndpointForUrls; // Hardcoded student ID
-
+  const graphqlEndpoint = 'http://localhost:5002/graphql';
+  const studentID = 'your-student-id'; // Replace with actual student ID
+  
   const mutation = `
     mutation {
       createExamVideoHighlight(
@@ -519,95 +444,45 @@ async function createVideoHighlightMutation(name, startTime, endTime) {
   `;
 
   try {
-    const response = await fetch('https://d-erps-sd62fh.pragament.com/graphql', {
+    const response = await fetch(graphqlEndpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: mutation }),
     });
 
     const data = await response.json();
     console.log('Mutation response:', data);
-
-    if (data.errors) {
-      console.error('Error while creating exam video highlight:', data.errors);
-    } else {
-      console.log('Video highlight created:', data.data.createExamVideoHighlight);
-    }
   } catch (error) {
     console.error('Error calling GraphQL API:', error);
   }
 }
 
-
-// Finalize and Merge Video
+// Finalize and Save Video
 document.getElementById('finalizeTrimButton').onclick = async () => {
   if (trimmedSegments.length === 0) {
-    alert('No trimmed segments to merge.');
+    alert('No highlights saved.');
     return;
   }
 
   const { canceled, filePath } = await ipcRenderer.invoke('showSaveDialog');
   if (canceled) return;
+  
+  const fullVideoBlob = await fetch(recordedVideo.src).then(res => res.blob());
+  const buffer = await fullVideoBlob.arrayBuffer();
 
-  const fullVideoPath = filePath.replace('.webm', '_full.webm'); // Save full video separately
+  writeFile(filePath, Buffer.from(buffer), (err) => {
+    if (err) {
+      console.error('Error saving full video:', err);
+    } else {
+      console.log('Full recorded video saved at:', filePath);
+      alert('Full video saved successfully!');
+    }
+  });
 
-  if (filePath) {
-    await mergeVideoSegments(trimmedSegments.map(seg => seg.path), filePath);
-    console.log('Final merged video saved at:', filePath);
-
-    // Save full recorded video as well
-    const fullVideoBlob = await fetch(recordedVideo.src).then(res => res.blob());
-    const buffer = await fullVideoBlob.arrayBuffer();
-    writeFile(fullVideoPath, Buffer.from(buffer), (err) => {
-      if (err) {
-        console.error('Error saving full video:', err);
-      } else {
-        console.log('Full recorded video saved at:', fullVideoPath);
-      }
-    });
-
-    alert('Final video and full recorded video saved successfully!');
-    trimmedSegments = []; // Reset after saving
-    trimVideoModal.style.display = 'none';
-  }
+  trimmedSegments = [];
+  trimVideoModal.style.display = 'none';
 };
 
-// Function to merge multiple segments
-async function mergeVideoSegments(segmentPaths, outputFilePath) {
-  const fileListPath = path.join(tmpdir(), 'segments.txt');
-
-  // Create a file listing all trimmed segments
-  const fileContent = segmentPaths.map(p => `file '${p}'`).join('\n');
-
-  return new Promise((resolve, reject) => {
-    writeFile(fileListPath, fileContent, (err) => {
-      if (err) {
-        console.error('Error writing segment list:', err);
-        reject(err);
-        return;
-      }
-
-      console.log('File list created at:', fileListPath);
-
-      // Merge segments using FFmpeg
-      ffmpeg()
-        .input(fileListPath)
-        .inputOptions(['-f concat', '-safe 0']) // Correct way to pass options
-        .output(outputFilePath)
-        .on('end', () => {
-          console.log('Merging completed');
-          resolve();
-        })
-        .on('error', (err) => {
-          console.error('Error merging video:', err);
-          reject(err);
-        })
-        .run();
-    });
-  });
-}
 
 
 startTestBtn.addEventListener("click", async ()=>{
