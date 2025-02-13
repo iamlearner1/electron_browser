@@ -220,7 +220,7 @@ async function fetchImages() {
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', { query });
+    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
     let images = response.data.data.getAllImageQuestions;
 
     // Shuffle images array using Fisher-Yates algorithm
@@ -299,7 +299,7 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', { query });
+    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
     const isUsed = response.data.data.checkIsUsed;
     console.log("isUsed:", isUsed);
 
@@ -325,7 +325,7 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
         }
       `;
 
-      const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
+      const mutationResponse = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query: mutation });
       console.log("Mutation Response:", mutationResponse.data);
 
       ipcRenderer.send('load-tinkercad', imageUrl);
@@ -443,7 +443,7 @@ document.getElementById('saveTrimButton').onclick = async () => {
 async function createVideoHighlightMutation(name, startTime, endTime) {
 
 const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
-  const graphqlEndpoint = 'http://localhost:5002/graphql';
+  const graphqlEndpoint = 'https://d-erps-sd62fh.pragament.com/graphql';
   const studentID = admission_no;
   
   const mutation = `
