@@ -276,15 +276,22 @@
 
   <!-- Settings Modal -->
   <div id="settingsModal">
-    <div class="modal-content">
-      <h2>Enter Your Admission Number and Computer Number</h2>
-      <label for="URLs Graphql Endpoint">Enter your Admission Number</label>
-      <input type="text" id="admissionno" placeholder="Enter your Admission Number">
+    <div class="modal-content" style="background-color: white; padding: 25px; border-radius: 12px; width: 400px; text-align: center; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); font-family: Arial, sans-serif;">
+    
+      <h2 style="color: #333; margin-bottom: 20px;">Enter Your Admission & Computer Number</h2>
+    
+      <label for="admissionno" style="font-size: 14px; font-weight: bold; color: #555; display: block; text-align: left; margin-bottom: 5px;">Admission Number:</label>
+      <input type="text" id="admissionno" placeholder="Enter your Admission Number" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 15px;">
+      
+      <label for="computernumber" style="font-size: 14px; font-weight: bold; color: #555; display: block; text-align: left; margin-bottom: 5px;">Computer Number:</label>
+      <input type="text" id="computernumber" placeholder="Enter Your Computer Number" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 20px;">
+      
       <br>
-      <label for="computerName"> Enter your Computer Number:</label>
-      <input type="text" id="computernumber" placeholder="Enter Your Computer Number">
-      <button id="saveSettings">Save</button>
-      <button id="closeSettings">Close</button>
+      
+      <button id="saveSettings" style="background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; margin-right: 10px;">Save</button>
+      
+      <button id="closeSettings" style="background-color: #dc3545; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold;">Close</button>
+    
     </div>
   </div>
 <!-- First Modal: Displays all images -->
