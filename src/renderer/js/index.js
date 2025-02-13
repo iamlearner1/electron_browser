@@ -220,18 +220,43 @@ async function fetchImages() {
     // Clear the previous images
     imageContainer.innerHTML = "";
 
-    // Loop through the images and display them
+    // Loop through the images and display them with titles and descriptions
     images.forEach(image => {
+      // Create a wrapper div for each image
+      const imageWrapper = document.createElement("div");
+      imageWrapper.style.textAlign = "center";
+      imageWrapper.style.marginBottom = "15px";
+
+      // Create an image element
       const imgElement = document.createElement("img");
       imgElement.src = image.imageUrl;
       imgElement.alt = "Image Question";
       imgElement.style.maxWidth = "300px"; // Adjust as needed
       imgElement.style.margin = "10px";
+      imgElement.style.display = "block"; // Center image
+
+      // Create a title element
+      const titleElement = document.createElement("h3");
+      titleElement.textContent = image.title;
+      titleElement.style.margin = "5px 0";
+
+      // Create a description element
+      const descElement = document.createElement("p");
+      descElement.textContent = image.description;
+      descElement.style.fontSize = "14px";
+      descElement.style.color = "#666"; // Light gray text for better readability
+      descElement.style.margin = "5px 0";
 
       // Pass title and description along with image element
       imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, imgElement));
 
-      imageContainer.appendChild(imgElement);
+      // Append elements to wrapper
+      imageWrapper.appendChild(titleElement);
+      imageWrapper.appendChild(imgElement);
+      imageWrapper.appendChild(descElement);
+
+      // Append wrapper to the container
+      imageContainer.appendChild(imageWrapper);
     });
 
     // Show the modal with all images
@@ -241,6 +266,7 @@ async function fetchImages() {
     console.error("Error fetching images:", error);
   }
 }
+
 
 // Function to close the first modal
 function closeTestModal() {

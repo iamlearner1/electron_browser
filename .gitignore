@@ -4,3 +4,4 @@ package-lock.json
 .DS_Store
 dist
 my-app-linux-x64
+my-app-linux-x64.zip
