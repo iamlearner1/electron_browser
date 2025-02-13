@@ -3,12 +3,12 @@ const { writeFile } = require('fs');
 const { tmpdir } = require('os');
 const path = require('path');
 const { store } = require('../main/utils/store.js');
-const { saveGraphQLEndpoints, getGraphQLEndpoints } = require('../main/utils/store.js');
+const { getsavedStudentComputerDetails, saveStudentComputerDetails } = require('../main/utils/store.js');
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg'); 
 let allowedDomains = [];
 
-
+const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
 // Fetch allowed domains from the GraphQL API
 async function fetchAllowedDomains() {
   try {
@@ -155,10 +155,12 @@ closeSettingsButton.addEventListener('click', () => {
 
 // Save settings and send data to the main process
 saveSettingsButton.addEventListener('click', async () => {
-  const deviceId = document.getElementById('deviceId').value;
-  const computerName = document.getElementById('computerName').value;
-  saveGraphQLEndpoints(deviceId, computerName);
-  console.log(getGraphQLEndpoints());
+  const admission_no = document.getElementById('admissionno').value;
+  const computerNumber = document.getElementById('computernumber').value;
+  console.log(admission_no);
+  
+  saveStudentComputerDetails(admission_no, computerNumber);
+  console.log(getsavedStudentComputerDetails());
   settingsModal.style.display = 'none';
 });
 
@@ -199,7 +201,6 @@ stopBtn.onclick = () => {
 //     selectMenu.appendChild(option);
 //   });
 // };
-
 async function fetchImages() {
   const imageContainer = document.getElementById("image-container");
   const query = `
@@ -217,49 +218,47 @@ async function fetchImages() {
     const response = await axios.post('http://localhost:5002/graphql', { query });
     const images = response.data.data.getAllImageQuestions;
 
-    // Clear the previous images
+    // Clear previous content
     imageContainer.innerHTML = "";
 
-    // Loop through the images and display them with titles and descriptions
     images.forEach(image => {
-      // Create a wrapper div for each image
-      const imageWrapper = document.createElement("div");
-      imageWrapper.style.textAlign = "center";
-      imageWrapper.style.marginBottom = "15px";
+      // Create a wrapper div to group image, title, and description
+      const wrapper = document.createElement("div");
+      wrapper.style.textAlign = "center";
+      wrapper.style.marginBottom = "20px";
+      wrapper.classList.add("image-wrapper"); // Add class for easier removal later
 
-      // Create an image element
+      // Create image element
       const imgElement = document.createElement("img");
       imgElement.src = image.imageUrl;
       imgElement.alt = "Image Question";
-      imgElement.style.maxWidth = "300px"; // Adjust as needed
+      imgElement.style.maxWidth = "300px";
       imgElement.style.margin = "10px";
-      imgElement.style.display = "block"; // Center image
 
-      // Create a title element
+      // Create title element
       const titleElement = document.createElement("h3");
-      titleElement.textContent = image.title;
+      titleElement.innerText = image.title;
       titleElement.style.margin = "5px 0";
 
-      // Create a description element
+      // Create description element
       const descElement = document.createElement("p");
-      descElement.textContent = image.description;
+      descElement.innerText = image.description;
       descElement.style.fontSize = "14px";
-      descElement.style.color = "#666"; // Light gray text for better readability
-      descElement.style.margin = "5px 0";
+      descElement.style.color = "gray";
 
-      // Pass title and description along with image element
-      imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, imgElement));
+      // Append elements to the wrapper
+      wrapper.appendChild(imgElement);
+      wrapper.appendChild(titleElement);
+      wrapper.appendChild(descElement);
 
-      // Append elements to wrapper
-      imageWrapper.appendChild(titleElement);
-      imageWrapper.appendChild(imgElement);
-      imageWrapper.appendChild(descElement);
+      // Add event listener
+      imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, wrapper));
 
-      // Append wrapper to the container
-      imageContainer.appendChild(imageWrapper);
+      // Append wrapper to container
+      imageContainer.appendChild(wrapper);
     });
 
-    // Show the modal with all images
+    // Show modal
     document.getElementById("image-modal").style.display = "flex";
 
   } catch (error) {
@@ -268,14 +267,14 @@ async function fetchImages() {
 }
 
 
+
 // Function to close the first modal
 function closeTestModal() {
     document.getElementById("image-modal").style.display = "none";
 }
 
 document.getElementById("close-modal-btn").addEventListener("click", closeTestModal);
-
-async function checkIsUsed(imageUrl, title, description, imgElement) {
+async function checkIsUsed(imageUrl, title, description, wrapper, computerNo) {
   const query = `
     query {
       checkIsUsed(imageUrl: "${imageUrl}")
@@ -289,18 +288,21 @@ async function checkIsUsed(imageUrl, title, description, imgElement) {
 
     if (isUsed === true) {
       alert("This image is not available. Please select another image.");
-      imgElement.remove();
+      wrapper.remove(); // Removes the entire wrapper (image, title, and description)
     } else {
       console.log("Image is valid:", imageUrl);
       closeTestModal();
-
-      // Show the second modal with title and description
       openImageModal(imageUrl, title, description);
 
-      // Call mutation to update studentId and isUsed status
+      // Mutation to update studentId and isUsed status
       const mutation = `
         mutation {
-          updateStudentIdAndIsUsed(imageUrl: "${imageUrl}", studentId: "fdfd", isUsed: true) {
+          updateStudentIdAndIsUsed(
+            imageUrl: "${imageUrl}",
+            studentId: "${admission_no}",
+            isUsed: true,
+            computerNo: "${computerNumber}"
+          ) {
             isUsed
           }
         }
@@ -311,11 +313,12 @@ async function checkIsUsed(imageUrl, title, description, imgElement) {
 
       ipcRenderer.send('load-tinkercad', imageUrl);
     }
-
   } catch (error) {
     console.error("Error checking image usage:", error);
   }
 }
+
+
 
 // Function to open the second modal with title and description
 function openImageModal(imageUrl, title, description) {

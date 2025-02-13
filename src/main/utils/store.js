@@ -26,19 +26,19 @@ function getDeviceInfo() {
 }
 
 // New function to store GraphQL endpoints
-function saveGraphQLEndpoints(graphqlEndpointForUrls, graphqlEndpointForQuiz) {
-  store.set('graphqlEndpointForUrls', graphqlEndpointForUrls);
-  store.set('graphqlEndpointForQuiz', graphqlEndpointForQuiz);
+function saveStudentComputerDetails(admission_no, computerNumber) {
+  store.set('admission_no', admission_no);
+  store.set('computer_no', computerNumber);
 
-  // console.log('GraphQL endpoints saved:', { graphqlEndpointForUrls, graphqlEndpointForQuiz });
+  console.log('GraphQL endpoints saved:', { admission_no,computerNumber});
 }
 
 // Function to retrieve GraphQL endpoints
-function getGraphQLEndpoints() {
-  const graphqlEndpointForUrls = store.get('graphqlEndpointForUrls');
-  const graphqlEndpointForQuiz = store.get('graphqlEndpointForQuiz');
+function getsavedStudentComputerDetails() {
+  const admission_no = store.get('admission_no');
+  const computerNumber = store.get('computer_no');
 
-  return { graphqlEndpointForUrls, graphqlEndpointForQuiz };
+  return { admission_no,computerNumber };
 }
 
 // Export functions to use them in other parts of the app
@@ -46,6 +46,6 @@ module.exports = {
   saveDeviceInfo, 
   getDeviceInfo, 
   store, 
-  saveGraphQLEndpoints,  // Export the new function
-  getGraphQLEndpoints    // Export the function to get the GraphQL endpoints
+  getsavedStudentComputerDetails,  // Export the new function
+  saveStudentComputerDetails    // Export the function to get the GraphQL endpoints
 };
