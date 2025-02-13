@@ -221,7 +221,13 @@ async function fetchImages() {
 
   try {
     const response = await axios.post('http://localhost:5002/graphql', { query });
-    const images = response.data.data.getAllImageQuestions;
+    let images = response.data.data.getAllImageQuestions;
+
+    // Shuffle images array using Fisher-Yates algorithm
+    for (let i = images.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [images[i], images[j]] = [images[j], images[i]];
+    }
 
     // Clear previous content
     imageContainer.innerHTML = "";
@@ -239,22 +245,25 @@ async function fetchImages() {
       imgElement.alt = "Image Question";
       imgElement.style.maxWidth = "300px";
       imgElement.style.margin = "10px";
+      imgElement.style.cursor = "pointer";
+      imgElement.style.borderRadius = "10px";
+      imgElement.style.boxShadow = "0px 4px 10px rgba(0, 0, 0, 0.2)";
 
       // Create title element
       const titleElement = document.createElement("h3");
       titleElement.innerText = image.title;
       titleElement.style.margin = "5px 0";
 
-      // Create description element
-      const descElement = document.createElement("p");
-      descElement.innerText = image.description;
-      descElement.style.fontSize = "14px";
-      descElement.style.color = "gray";
+      // // Create description element
+      // const descElement = document.createElement("p");
+      // descElement.innerText = image.description;
+      // descElement.style.fontSize = "14px";
+      // descElement.style.color = "gray";
 
       // Append elements to the wrapper
       wrapper.appendChild(imgElement);
       wrapper.appendChild(titleElement);
-      wrapper.appendChild(descElement);
+      // wrapper.appendChild(descElement);
 
       // Add event listener
       imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, wrapper));
@@ -270,6 +279,7 @@ async function fetchImages() {
     console.error("Error fetching images:", error);
   }
 }
+
 
 
 
