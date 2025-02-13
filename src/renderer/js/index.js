@@ -8,7 +8,6 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg'); 
 let allowedDomains = [];
 
-const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
 // Fetch allowed domains from the GraphQL API
 async function fetchAllowedDomains() {
   try {
@@ -281,6 +280,8 @@ function closeTestModal() {
 
 document.getElementById("close-modal-btn").addEventListener("click", closeTestModal);
 async function checkIsUsed(imageUrl, title, description, wrapper, computerNo) {
+
+const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
   const query = `
     query {
       checkIsUsed(imageUrl: "${imageUrl}")
@@ -430,6 +431,8 @@ document.getElementById('saveTrimButton').onclick = async () => {
 
 // Function to call GraphQL mutation
 async function createVideoHighlightMutation(name, startTime, endTime) {
+
+const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
   const graphqlEndpoint = 'http://localhost:5002/graphql';
   const studentID = admission_no;
   
