@@ -179,6 +179,12 @@ const endTimeInput = document.getElementById('endTime');
 // const trimVideoButton = document.getElementById('trimVideoButton');
 const closeTrimModal = document.getElementById('closeTrimModal');
 
+closeTrimModal.onclick = () => {
+  const confirmClose = confirm("Are you sure you want to close the Highlight Window click on finalize video ?");
+  if (confirmClose) {
+    trimVideoModal.style.display = 'none';
+  }
+};
 // Start recording button
 // startBtn.onclick = async () => {
 //   await startRecording();
