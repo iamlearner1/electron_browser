@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/survey-core@1.12.19/survey.core.min.js"></script>
+    <script src="https://unpkg.com/survey-core@1.12.19/survey.i18n.min.js"></script>
+    <script src="https://unpkg.com/survey-core@1.12.19/themes/index.min.js"></script>
+    <script src="https://unpkg.com/survey-js-ui@1.12.19/survey-js-ui.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/survey-core@1.12.19/defaultV2.min.css" />
+    <link rel="stylesheet" href="../renderer/styles/quiz.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      #quizIdInput {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        z-index: 10; /* Ensure it stays on top of surveyElement */
+      }
+
+      #fetchQuizBtn {
+        display: block;
+        padding: 10px 20px;
+        margin-bottom: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 10; /* Ensure it stays on top of surveyElement */
+      }
+
+      #fetchQuizBtn:hover {
+        background-color: #45a049;
+      }
+
+      #closeQuizBtn {
+        padding: 10px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+        z-index: 10; /* Ensure the button is interactable */
+      }
+
+      #closeQuizBtn:hover {
+        background-color: #e53935;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="text" id="quizIdInput" placeholder="Enter Quiz ID" />
+    <button id="fetchQuizBtn">Fetch Quiz</button>
+    <div id="surveyElement"></div>
+    <button id="closeQuizBtn">Close</button>
+
+    <script src="../renderer/js/json.js"></script>
+    <script src="../renderer/js/quiz.js"></script>
+    <script>
+      const fetchQuizBtn = document.getElementById("fetchQuizBtn");
+      const closeQuizBtn = document.getElementById("closeQuizBtn");
+
+      // Fetch Quiz Button Click Event
+      fetchQuizBtn.addEventListener("click", () => {
+        const quizIdInput = document.getElementById("quizIdInput").value;
+        if (!quizIdInput) {
+          alert("Please enter a Quiz ID.");
+          return;
+        }
+        console.log("Fetching Quiz for ID:", quizIdInput);
+
+        // Add logic to fetch and render quiz here
+      });
+
+      // Close Button Click Event
+      closeQuizBtn.addEventListener("click", () => {
+        console.log("Close button has been clicked.");
+        window.close();
+      });
+    </script>
+  </body>
+</html>

@@ -28,7 +28,7 @@
     "devDependencies": {
         "electron": "^34.0.0",
         "electron-builder": "^25.1.8",
-        "electron-packager": "^17.1.1"
+        "electron-packager": "^17.1.2"
     },
     "author": "Sunny Shiva",
     "license": "MIT",

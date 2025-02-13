@@ -287,19 +287,28 @@
       <button id="closeSettings">Close</button>
     </div>
   </div>
-  <div id="image-modal" style="display: none;">
-    <button id="close-modal-btn" style="padding: 10px; background-color: red; color: white; border: none; border-radius: 5px;">Close Modal</button>
-    <div id="modal-content">
-      <span id="close-modal" style="cursor: pointer;">&times;</span>
-      
-      <div id="image-container"></div>
-    </div>
-  </div>
+<!-- First Modal: Displays all images -->
+<div id="image-modal" style="display: none;">
+  <button id="close-modal-btn" style="padding: 10px; background-color: red; color: white; border: none; border-radius: 5px;">Close Modal</button>
   
-  <div id="imageModal" class="modal">
-    <span class="close" onclick="document.getElementById('imageModal').style.display='none'">&times;</span>
-    <img class="modal-content" id="modalImage">
+  <!-- Added Title -->
+  <h2 id="image-modal-title" style="text-align: center; margin-top: 10px;">Select an Image</h2>
+
+  <div id="modal-content">
+    <div id="image-container"></div>
   </div>
+</div>
+
+
+<!-- Second Modal: Displays selected image with title and description -->
+<div id="imageModal" class="modal" style="display: none;">
+  <span class="close" onclick="document.getElementById('imageModal').style.display='none'">&times;</span>
+  <h2 id="modalTitle"></h2> <!-- Title above the image -->
+  <img class="modal-content" id="modalImage">
+  <p id="modalDescription"></p> <!-- Description below the image -->
+</div>
+
+
   <!-- Device Registration Dialog -->
   <div id="register-dialog">
     <div class="modal-content">

@@ -200,7 +200,6 @@ stopBtn.onclick = () => {
 //   });
 // };
 
-
 async function fetchImages() {
   const imageContainer = document.getElementById("image-container");
   const query = `
@@ -208,15 +207,14 @@ async function fetchImages() {
       getAllImageQuestions {
         id
         imageUrl
+        title
+        description
       }
     }
   `;
 
   try {
-    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', {
-      query: query
-    });
-    
+    const response = await axios.post('http://localhost:5002/graphql', { query });
     const images = response.data.data.getAllImageQuestions;
 
     // Clear the previous images
@@ -230,33 +228,28 @@ async function fetchImages() {
       imgElement.style.maxWidth = "300px"; // Adjust as needed
       imgElement.style.margin = "10px";
 
-      // Pass the image element to checkIsUsed function
-      imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, imgElement));
+      // Pass title and description along with image element
+      imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, imgElement));
 
       imageContainer.appendChild(imgElement);
     });
 
-    // Show the modal
-    const modal = document.getElementById("image-modal");
-    modal.style.display = "flex";
+    // Show the modal with all images
+    document.getElementById("image-modal").style.display = "flex";
 
   } catch (error) {
     console.error("Error fetching images:", error);
   }
 }
-const closeModalButton = document.getElementById("close-modal-btn");
 
-function closeTestModal(){
-    const modal = document.getElementById("image-modal");
-    modal.style.display = "none";
+// Function to close the first modal
+function closeTestModal() {
+    document.getElementById("image-modal").style.display = "none";
 }
 
-closeModalButton.addEventListener("click", () => {
-  const modal = document.getElementById("image-modal");
-  modal.style.display = "none";
-});
+document.getElementById("close-modal-btn").addEventListener("click", closeTestModal);
 
-async function checkIsUsed(imageUrl, imgElement) {
+async function checkIsUsed(imageUrl, title, description, imgElement) {
   const query = `
     query {
       checkIsUsed(imageUrl: "${imageUrl}")
@@ -264,7 +257,7 @@ async function checkIsUsed(imageUrl, imgElement) {
   `;
 
   try {
-    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
+    const response = await axios.post('http://localhost:5002/graphql', { query });
     const isUsed = response.data.data.checkIsUsed;
     console.log("isUsed:", isUsed);
 
@@ -275,6 +268,9 @@ async function checkIsUsed(imageUrl, imgElement) {
       console.log("Image is valid:", imageUrl);
       closeTestModal();
 
+      // Show the second modal with title and description
+      openImageModal(imageUrl, title, description);
+
       // Call mutation to update studentId and isUsed status
       const mutation = `
         mutation {
@@ -284,7 +280,7 @@ async function checkIsUsed(imageUrl, imgElement) {
         }
       `;
 
-      const mutationResponse = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query: mutation });
+      const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
       console.log("Mutation Response:", mutationResponse.data);
 
       ipcRenderer.send('load-tinkercad', imageUrl);
@@ -294,6 +290,15 @@ async function checkIsUsed(imageUrl, imgElement) {
     console.error("Error checking image usage:", error);
   }
 }
+
+// Function to open the second modal with title and description
+function openImageModal(imageUrl, title, description) {
+  document.getElementById("modalTitle").innerText = title;
+  document.getElementById("modalImage").src = imageUrl;
+  document.getElementById("modalDescription").innerText = description;
+  document.getElementById("imageModal").style.display = "block";
+}
+
 
 
 

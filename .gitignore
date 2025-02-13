@@ -3,3 +3,4 @@ release-builds
 package-lock.json
 .DS_Store
 dist
+my-app-linux-x64
