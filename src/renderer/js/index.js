@@ -176,7 +176,7 @@ const trimVideoModal = document.getElementById('trimVideoModal');
 const recordedVideo = document.getElementById('recordedVideo');
 const startTimeInput = document.getElementById('startTime');
 const endTimeInput = document.getElementById('endTime');
-const trimVideoButton = document.getElementById('trimVideoButton');
+// const trimVideoButton = document.getElementById('trimVideoButton');
 const closeTrimModal = document.getElementById('closeTrimModal');
 
 // Start recording button
@@ -400,18 +400,20 @@ let trimmedSegments = [];
 document.getElementById('saveTrimButton').onclick = async () => {
   const startTime = recordedVideo.currentTime.toFixed(2);
   const duration = parseInt(document.getElementById('endTimeDropdown').value);
-  const highlightName = document.getElementById('highlightName').value.trim();
-  
+  const highlightName = document.getElementById('highlightNameDropdown').value; // Get value from dropdown
+
   const endTime = (parseFloat(startTime) + duration).toFixed(2);
+  
   if (endTime > recordedVideo.duration) {
     alert('End time exceeds video duration.');
     return;
   }
+
   if (!highlightName) {
-    alert("Please enter a highlight name.");
+    alert("Please select a highlight name.");
     return;
   }
-  
+
   trimmedSegments.push({ name: highlightName, startTime, endTime });
   console.log(`Segment saved: ${highlightName} (${startTime} - ${endTime})`);
   alert(`Segment ${trimmedSegments.length} saved!`);
@@ -419,10 +421,11 @@ document.getElementById('saveTrimButton').onclick = async () => {
   await createVideoHighlightMutation(highlightName, parseInt(startTime), parseInt(endTime));
 };
 
+
 // Function to call GraphQL mutation
 async function createVideoHighlightMutation(name, startTime, endTime) {
   const graphqlEndpoint = 'http://localhost:5002/graphql';
-  const studentID = 'your-student-id'; // Replace with actual student ID
+  const studentID = admission_no;
   
   const mutation = `
     mutation {

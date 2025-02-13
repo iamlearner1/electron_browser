@@ -318,9 +318,15 @@
     <p>Start Time: <span id="startTimeDisplay">0</span> seconds</p>
     <br>
     
-    <!-- New Highlight Name Field -->
-    <label for="highlightName">Highlight Name:</label>
-    <input type="text" id="highlightName" placeholder="Enter highlight name" />
+    <!-- Highlight Name Dropdown -->
+    <label for="highlightNameDropdown">Select Highlight:</label>
+    <select id="highlightNameDropdown">
+      <option value="goal">Goal</option>
+      <option value="foul">Foul</option>
+      <option value="save">Save</option>
+      <option value="assist">Assist</option>
+      <option value="dribble">Dribble</option>
+    </select>
     <br><br>
 
     <label for="endTimeDropdown">Select Duration:</label>
@@ -328,12 +334,13 @@
       <option value="5">5 sec</option>
       <option value="10">10 sec</option>
       <option value="15">15 sec</option>
+      <option value="20">20 sec</option>
+      <option value="25">25 sec</option>
+      <option value="30">30 sec</option>
     </select>    
     <br>
-    <button id="saveTrimButton">Save Trim</button>
+    <button id="saveTrimButton">Save  Highlights</button>
     <button id="finalizeTrimButton">Finalize Video</button>
-
-    <button id="trimVideoButton">Trim Video</button>
     <button id="closeTrimModal">Close</button>
   </div>
 </div>
