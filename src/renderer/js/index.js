@@ -206,6 +206,8 @@ stopBtn.onclick = () => {
 //     selectMenu.appendChild(option);
 //   });
 // };
+let selectedQuestionID = null; // Variable to store the selected image ID
+
 async function fetchImages() {
   const imageContainer = document.getElementById("image-container");
   const query = `
@@ -263,7 +265,7 @@ async function fetchImages() {
       wrapper.appendChild(titleElement);
 
       // Add event listener
-      imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, wrapper));
+      imgElement.addEventListener("click", () => checkIsUsed(image.id, image.imageUrl, image.title, image.description, wrapper));
 
       // Append wrapper to container
       imageContainer.appendChild(wrapper);
@@ -281,19 +283,16 @@ async function fetchImages() {
   }
 }
 
-
-
-
-
 // Function to close the first modal
 function closeTestModal() {
     document.getElementById("image-modal").style.display = "none";
 }
 
 document.getElementById("close-modal-btn").addEventListener("click", closeTestModal);
-async function checkIsUsed(imageUrl, title, description, wrapper, computerNo) {
 
-const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
+async function checkIsUsed(imageID, imageUrl, title, description, wrapper) {
+  const { admission_no, computerNumber } = getsavedStudentComputerDetails();
+
   const query = `
     query {
       checkIsUsed(imageUrl: "${imageUrl}")
@@ -312,6 +311,10 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
       console.log("Image is valid:", imageUrl);
       closeTestModal();
       openImageModal(imageUrl, title, description);
+
+      // Store the selected image ID
+      selectedQuestionID = imageID;
+      console.log("Selected Question ID:", selectedQuestionID);
 
       // Mutation to update studentId and isUsed status
       const mutation = `
@@ -351,74 +354,62 @@ function openImageModal(imageUrl, title, description) {
 
 
 // Set to capture entire screen directly without dropdown
+
 async function startRecording() {
-  // AUDIO WON'T WORK ON MACOS
   const isMacOS = (await ipcRenderer.invoke('get-operating-system')) === 'darwin';
   const audio = !isMacOS
-    ? {
-        mandatory: {
-          chromeMediaSource: 'desktop',
-        },
-      }
+    ? { mandatory: { chromeMediaSource: 'desktop' } }
     : false;
 
   const constraints = {
     audio,
-    video: {
-      mandatory: {
-        chromeMediaSource: 'desktop', // Capture entire screen
-      },
-    },
+    video: { mandatory: { chromeMediaSource: 'desktop' } },
   };
 
-  // Create a stream
   const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
   // Preview the source in a video element
   videoElement.srcObject = stream;
   await videoElement.play();
 
-  // Start media recording
-  mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' });
+  // Use H.264 (MP4) for better compatibility & faster loading
+  mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
   mediaRecorder.ondataavailable = onDataAvailable;
   mediaRecorder.onstop = stopRecording;
   mediaRecorder.start();
 }
 
-// Data available handler
 function onDataAvailable(event) {
-  recordedChunks.push(event.data);
+  if (event.data.size > 0) {
+    recordedChunks.push(event.data);
+  }
 }
-// Stop recording handler
-async function stopRecording() {
-  videoElement.srcObject = null;
 
-  // Ensure the previous video URL is revoked to free memory
+async function stopRecording() {
+  mediaRecorder.stop();
+  videoElement.srcObject.getTracks().forEach(track => track.stop()); // Stop the stream
+
   if (recordedVideo.src) {
     URL.revokeObjectURL(recordedVideo.src);
   }
 
   // Convert recorded chunks to a Blob
-  const blob = new Blob(recordedChunks, {
-    type: 'video/webm; codecs=vp9',  // Use vp9 for better performance
-  });
-  recordedChunks = [];
+  const blob = new Blob(recordedChunks, { type: 'video/mp4' });
 
-  // Create a fast-loading video URL
+  recordedChunks = []; // Clear memory
   const videoUrl = URL.createObjectURL(blob);
-  recordedVideo.src = videoUrl;
-  recordedVideo.preload = "metadata";  // Helps with fast metadata loading
 
-  // Set max values for start and end time inputs when metadata is available
+  // Stream video while processing
+  recordedVideo.src = videoUrl;
+  recordedVideo.preload = "metadata";
+
   recordedVideo.onloadedmetadata = () => {
     startTimeInput.max = recordedVideo.duration;
     endTimeInput.max = recordedVideo.duration;
   };
 
-  // Show the trim video modal
   trimVideoModal.style.display = 'block';
 }
-
 
 
 let trimmedSegments = [];
@@ -445,12 +436,12 @@ document.getElementById('saveTrimButton').onclick = async () => {
   console.log(`Segment saved: ${highlightName} (${startTime} - ${endTime})`);
   alert(`Segment ${trimmedSegments.length} saved!`);
 
-  await createVideoHighlightMutation(highlightName, parseInt(startTime), parseInt(endTime));
+  await createVideoHighlightMutation(highlightName, parseInt(startTime), parseInt(endTime),selectedQuestionID);
 };
 
 
 // Function to call GraphQL mutation
-async function createVideoHighlightMutation(name, startTime, endTime) {
+async function createVideoHighlightMutation(name, startTime, endTime,selectedQuestionID) {
 
 const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
   const graphqlEndpoint = 'http://localhost:5002/graphql';
@@ -463,7 +454,8 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
           name: "${name}",
           startTime: ${startTime},
           endTime: ${endTime},
-          studentID: "${studentID}"
+          studentID: "${studentID}",
+          ImageQuestionID: "${selectedQuestionID}"
         }
       ) {
         id
@@ -471,6 +463,7 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
         startTime
         endTime
         studentID
+        ImageQuestionID
       }
     }
   `;
