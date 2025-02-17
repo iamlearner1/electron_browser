@@ -215,13 +215,17 @@ async function fetchImages() {
         imageUrl
         title
         description
+        isUsed
       }
     }
   `;
 
   try {
-    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
+    const response = await axios.post('http://localhost:5002/graphql', { query });
     let images = response.data.data.getAllImageQuestions;
+
+    // Filter images where isUsed is false
+    images = images.filter(image => !image.isUsed);
 
     // Shuffle images array using Fisher-Yates algorithm
     for (let i = images.length - 1; i > 0; i--) {
@@ -254,16 +258,9 @@ async function fetchImages() {
       titleElement.innerText = image.title;
       titleElement.style.margin = "5px 0";
 
-      // // Create description element
-      // const descElement = document.createElement("p");
-      // descElement.innerText = image.description;
-      // descElement.style.fontSize = "14px";
-      // descElement.style.color = "gray";
-
       // Append elements to the wrapper
       wrapper.appendChild(imgElement);
       wrapper.appendChild(titleElement);
-      // wrapper.appendChild(descElement);
 
       // Add event listener
       imgElement.addEventListener("click", () => checkIsUsed(image.imageUrl, image.title, image.description, wrapper));
@@ -272,13 +269,18 @@ async function fetchImages() {
       imageContainer.appendChild(wrapper);
     });
 
-    // Show modal
-    document.getElementById("image-modal").style.display = "flex";
+    // Show modal only if there are images to display
+    if (images.length > 0) {
+      document.getElementById("image-modal").style.display = "flex";
+    } else {
+      console.log("No unused images available.");
+    }
 
   } catch (error) {
     console.error("Error fetching images:", error);
   }
 }
+
 
 
 
@@ -299,7 +301,7 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
   `;
 
   try {
-    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
+    const response = await axios.post('http://localhost:5002/graphql', { query });
     const isUsed = response.data.data.checkIsUsed;
     console.log("isUsed:", isUsed);
 
@@ -325,7 +327,7 @@ const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
         }
       `;
 
-      const mutationResponse = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query: mutation });
+      const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
       console.log("Mutation Response:", mutationResponse.data);
 
       ipcRenderer.send('load-tinkercad', imageUrl);
@@ -391,25 +393,33 @@ function onDataAvailable(event) {
 async function stopRecording() {
   videoElement.srcObject = null;
 
+  // Ensure the previous video URL is revoked to free memory
+  if (recordedVideo.src) {
+    URL.revokeObjectURL(recordedVideo.src);
+  }
+
+  // Convert recorded chunks to a Blob
   const blob = new Blob(recordedChunks, {
-    type: 'video/webm; codecs=vp9',
+    type: 'video/webm; codecs=vp9',  // Use vp9 for better performance
   });
   recordedChunks = [];
 
-  // Create a URL for the recorded video
+  // Create a fast-loading video URL
   const videoUrl = URL.createObjectURL(blob);
   recordedVideo.src = videoUrl;
+  recordedVideo.preload = "metadata";  // Helps with fast metadata loading
 
-  // Set max values for start and end time inputs
-  recordedVideo.addEventListener('loadedmetadata', () => {
-    const duration = recordedVideo.duration;
-    startTimeInput.max = duration;
-    endTimeInput.max = duration;
-  });
+  // Set max values for start and end time inputs when metadata is available
+  recordedVideo.onloadedmetadata = () => {
+    startTimeInput.max = recordedVideo.duration;
+    endTimeInput.max = recordedVideo.duration;
+  };
 
   // Show the trim video modal
   trimVideoModal.style.display = 'block';
 }
+
+
 
 let trimmedSegments = [];
 
@@ -443,7 +453,7 @@ document.getElementById('saveTrimButton').onclick = async () => {
 async function createVideoHighlightMutation(name, startTime, endTime) {
 
 const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
-  const graphqlEndpoint = 'https://d-erps-sd62fh.pragament.com/graphql';
+  const graphqlEndpoint = 'http://localhost:5002/graphql';
   const studentID = admission_no;
   
   const mutation = `
