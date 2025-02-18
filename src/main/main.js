@@ -110,7 +110,7 @@ let storedImageUrl = ""; // Declare the variable globally
 
 ipcMain.on('load-tinkercad', (event, imageUrl) => {
   storedImageUrl = imageUrl; // Store the image URL
-  mainWindow.webContents.send('update-webview', 'https://www.tinkercad.com/joinclass/HTGPACXK4');
+ // mainWindow.webContents.send('update-webview', 'https://www.tinkercad.com/joinclass/HTGPACXK4');
 });
 
 ipcMain.on('request-image', (event) => {
