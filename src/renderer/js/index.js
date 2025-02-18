@@ -260,12 +260,77 @@ async function fetchImages() {
       titleElement.innerText = image.title;
       titleElement.style.margin = "5px 0";
 
+      // Create a modal to show image details and the OK and Close buttons
+      const modal = document.createElement("div");
+      modal.classList.add("modal");
+      modal.style.display = "none"; // Initially hidden
+      modal.style.position = "fixed";
+      modal.style.top = "50%";
+      modal.style.left = "50%";
+      modal.style.transform = "translate(-50%, -50%)";
+      modal.style.backgroundColor = "#fff";
+      modal.style.padding = "20px";
+      modal.style.boxShadow = "0px 4px 10px rgba(0, 0, 0, 0.2)";
+      modal.style.borderRadius = "10px";
+      modal.style.zIndex = "1000";
+
+      const modalTitle = document.createElement("h3");
+      modalTitle.innerText = image.title;
+      modal.appendChild(modalTitle);
+
+      const modalDescription = document.createElement("p");
+      modalDescription.innerText = image.description;
+      modal.appendChild(modalDescription);
+
+      // Create OK button
+      const okButton = document.createElement("button");
+      okButton.innerText = "OK";
+      okButton.style.marginTop = "20px";
+      okButton.style.padding = "10px 20px";
+      okButton.style.cursor = "pointer";
+      okButton.style.backgroundColor = "#4CAF50";
+      okButton.style.color = "#fff";
+      okButton.style.border = "none";
+      okButton.style.borderRadius = "5px";
+      okButton.style.fontSize = "16px";
+
+      // Add OK button click listener
+      okButton.addEventListener("click", () => {
+        checkIsUsed(image.id, image.imageUrl, image.title, image.description, wrapper);
+        modal.style.display = "none"; // Close the modal after clicking OK
+      });
+
+      // Create Close button
+      const closeButton = document.createElement("button");
+      closeButton.innerText = "Close";
+      closeButton.style.marginTop = "20px";
+      closeButton.style.padding = "10px 20px";
+      closeButton.style.cursor = "pointer";
+      closeButton.style.backgroundColor = "#f44336"; // Red for Close button
+      closeButton.style.color = "#fff";
+      closeButton.style.border = "none";
+      closeButton.style.borderRadius = "5px";
+      closeButton.style.fontSize = "16px";
+
+      // Add Close button click listener
+      closeButton.addEventListener("click", () => {
+        modal.style.display = "none"; // Close the modal
+      });
+
+      // Append OK and Close buttons to the modal
+      modal.appendChild(okButton);
+      modal.appendChild(closeButton);
+
+      document.body.appendChild(modal); // Add modal to the body
+
+      // Add event listener to image
+      imgElement.addEventListener("click", () => {
+        modal.style.display = "block"; // Show modal when image is clicked
+      });
+
       // Append elements to the wrapper
       wrapper.appendChild(imgElement);
       wrapper.appendChild(titleElement);
-
-      // Add event listener
-      imgElement.addEventListener("click", () => checkIsUsed(image.id, image.imageUrl, image.title, image.description, wrapper));
 
       // Append wrapper to container
       imageContainer.appendChild(wrapper);
