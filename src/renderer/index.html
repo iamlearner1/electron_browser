@@ -247,23 +247,47 @@
   <button id="refresh-button" style="font-size: 15px; padding: 15px 20px; border: none; border-radius: 25px; background-color: #f39c12; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" onmouseover="this.style.backgroundColor='#f39c12'; this.style.transform='scale(1.05)';" onmouseout="this.style.backgroundColor='#f39c12'; this.style.transform='scale(1)';" onmousedown="this.style.transform='scale(0.98)';" onmouseup="this.style.transform='scale(1)';">
     <i class="fas fa-sync-alt"></i> <!-- FontAwesome Refresh Icon -->
   </button>
-  
-  <input type="text" id="url-input" placeholder="Enter website URL">
-  <button class="navbutton" id="search-button">Search</button>
-  <video class="small-video" autoplay muted loop></video>
-  <button class="navbutton" id="show-Image">
-    showImage
+  <button id="home-button" style="font-size: 15px; padding: 15px 20px; border: none; border-radius: 25px; background-color: #28a745; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);" onmouseover="this.style.backgroundColor='#218838'; this.style.transform='scale(1.05)';" onmouseout="this.style.backgroundColor='#28a745'; this.style.transform='scale(1)';" onmousedown="this.style.transform='scale(0.98)';" onmouseup="this.style.transform='scale(1)';" onclick="loadHomePage();">
+    <i class="fas fa-home"></i> <!-- FontAwesome Home Icon -->
   </button>
+    
+<!-- URL input field -->
+<input type="text" id="url-input" placeholder="Enter website URL" style="font-size: 14px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin: 10px 0;">
+
+<!-- Search Button with Icon -->
+<button class="navbutton" id="search-button" style="font-size: 15px; padding: 10px 20px; border: none; border-radius: 25px; background-color: #007bff; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <i class="fas fa-search"></i> <!-- FontAwesome Search Icon -->
+  Search
+</button>
+
+<!-- Video Element -->
+<video class="small-video" autoplay muted loop style="max-width: 100%; border-radius: 10px; border: 2px solid #ccc; margin: 10px 0;"></video>
+
+<!-- Show Image Button with Icon -->
+<button class="navbutton" id="show-Image" style="font-size: 15px; padding: 10px 20px; border: none; border-radius: 25px; background-color: #28a745; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <i class="fas fa-image"></i> <!-- FontAwesome Image Icon -->
+  Show Image
+</button>
+
 </div>
 
-  <div id="nav-buttons">
-    <button class="navbutton" id="settingsButton">Settings</button>
-    <button class="navbutton" id="startTestBtn" class="button is-primary">Start Test</button>
-    <button class="navbutton" id="stopBtn" class="button is-warning">End Test</button>
-    <!-- <button class="navbutton" id="startPollBtn">Start Poll</button>
-    <button class="navbutton" id="startQuizBtn">Start Quizz</button> -->
- 
-  </div>
+ <!-- Settings Button with Icon -->
+<button class="navbutton" id="settingsButton" style="font-size: 15px; padding: 10px 20px; border: none; border-radius: 25px; background-color: #f39c12; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <i class="fas fa-cogs"></i> <!-- FontAwesome Settings Icon -->
+  Settings
+</button>
+
+<!-- Start Test Button with Icon -->
+<button class="navbutton" id="startTestBtn" style="font-size: 15px; padding: 10px 20px; border: none; border-radius: 25px; background-color: #007bff; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <i class="fas fa-play"></i> <!-- FontAwesome Play Icon -->
+  Start Test
+</button>
+
+<!-- End Test Button with Icon -->
+<button class="navbutton" id="stopBtn" style="font-size: 15px; padding: 10px 20px; border: none; border-radius: 25px; background-color: #e74c3c; color: white; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; margin: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+  <i class="fas fa-stop"></i> <!-- FontAwesome Stop Icon -->
+  End Test
+</button>
 
   <div style="text-align: center; margin-top: 10px;">
     <!-- <button class="navbutton" id="startBtn" class="button is-primary">Start</button> -->

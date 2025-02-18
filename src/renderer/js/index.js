@@ -604,3 +604,8 @@ window.onclick = (event) => {
     modal.style.display = "none";
   }
 };
+
+function loadHomePage() {
+  const webview = document.getElementById('webview');
+  webview.setAttribute('src', 'https://pragament.github.io/electron_browser_home_page/');
+}
