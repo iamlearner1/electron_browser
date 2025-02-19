@@ -192,6 +192,7 @@ closeTrimModal.onclick = () => {
 
 // Stop recording button
 stopBtn.onclick = () => {
+  startTestBtn.disabled = false; 
   mediaRecorder.stop();
   // startBtn.innerText = 'Start';
 };
@@ -576,6 +577,7 @@ document.getElementById('finalizeTrimButton').onclick = async () => {
 
 
 startTestBtn.addEventListener("click", async ()=>{
+  startTestBtn.disabled = true; // Disable the button
   await startRecording();
   fetchImages();
 });
