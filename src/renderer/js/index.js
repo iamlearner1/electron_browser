@@ -487,7 +487,7 @@ document.getElementById('saveTrimButton').onclick = async () => {
   const highlightName = document.getElementById('highlightNameDropdown').value; // Get value from dropdown
 
   const endTime = (parseFloat(startTime) + duration).toFixed(2);
-  
+
   if (endTime > recordedVideo.duration) {
     alert('End time exceeds video duration.');
     return;
@@ -498,12 +498,19 @@ document.getElementById('saveTrimButton').onclick = async () => {
     return;
   }
 
+  // Check for duplicate startTime
+  if (trimmedSegments.some(segment => segment.startTime === startTime)) {
+    alert("A highlight with the same start time already exists.");
+    return;
+  }
+
   trimmedSegments.push({ name: highlightName, startTime, endTime });
   console.log(`Segment saved: ${highlightName} (${startTime} - ${endTime})`);
   alert(`Segment ${trimmedSegments.length} saved!`);
 
-  await createVideoHighlightMutation(highlightName, parseInt(startTime), parseInt(endTime),selectedQuestionID);
+  await createVideoHighlightMutation(highlightName, parseInt(startTime), parseInt(endTime), selectedQuestionID);
 };
+
 
 
 // Function to call GraphQL mutation
