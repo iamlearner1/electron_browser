@@ -26,13 +26,16 @@ function getDeviceInfo() {
 }
 
 // New function to store GraphQL endpoints
-function saveStudentComputerDetails(admission_no, computerNumber) {
-  store.set('admission_no', admission_no);
+function saveComputerDetails(computerNumber) {
   store.set('computer_no', computerNumber);
 
-  console.log('GraphQL endpoints saved:', { admission_no,computerNumber});
+  console.log('Computer number saved:', {computerNumber});
 }
 
+function saveStudentDetails(admission_no) {
+  store.set('admission_no', admission_no);
+  console.log("student admission number saved : ",{admission_no});
+}
 // Function to retrieve GraphQL endpoints
 function getsavedStudentComputerDetails() {
   const admission_no = store.get('admission_no');
@@ -47,5 +50,6 @@ module.exports = {
   getDeviceInfo, 
   store, 
   getsavedStudentComputerDetails,  // Export the new function
-  saveStudentComputerDetails    // Export the function to get the GraphQL endpoints
+  saveComputerDetails ,   // Export the function to get the GraphQL endpoints,
+  saveStudentDetails
 };

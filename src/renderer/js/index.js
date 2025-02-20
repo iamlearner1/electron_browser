@@ -3,8 +3,10 @@ const { writeFile } = require('fs');
 const { tmpdir } = require('os');
 const path = require('path');
 const { store } = require('../main/utils/store.js');
-const { getsavedStudentComputerDetails, saveStudentComputerDetails } = require('../main/utils/store.js');
+const { getsavedStudentComputerDetails} = require('../main/utils/store.js');
 const ffmpeg = require('fluent-ffmpeg');
+const { saveStudentDetails, saveComputerDetails } = require('../main/utils/store.js');
+const { log } = require('console');
 ffmpeg.setFfmpegPath('/opt/homebrew/bin/ffmpeg'); 
 let allowedDomains = [];
 
@@ -80,6 +82,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   const prevButton = document.getElementById('prev-button');
   const nextButton = document.getElementById('next-button');
   const startTestBtn = document.getElementById("image-modal");
+  const examModal = document.getElementById("examModal");
+const confirmExamBtn = document.getElementById("confirmExamBtn");
+const closeExamModal = document.getElementById("closeExamModal");
   // When the "Search" button is clicked, validate and load the URL into the webview
   searchButton.addEventListener('click', () => {
     let url = urlInput.value.trim();
@@ -154,11 +159,13 @@ closeSettingsButton.addEventListener('click', () => {
 
 // Save settings and send data to the main process
 saveSettingsButton.addEventListener('click', async () => {
-  const admission_no = document.getElementById('admissionno').value;
+  // const admission_no = document.getElementById('admissionno').value;
   const computerNumber = document.getElementById('computernumber').value;
-  console.log(admission_no);
+ // console.log(admission_no);
   
-  saveStudentComputerDetails(admission_no, computerNumber);
+  // saveStudentComputerDetails(admission_no, computerNumber);
+  // saveStudentDetails(admission_no);
+  saveComputerDetails(computerNumber)
   console.log(getsavedStudentComputerDetails());
   settingsModal.style.display = 'none';
 });
@@ -211,14 +218,23 @@ let selectedQuestionID = null; // Variable to store the selected image ID
 
 async function fetchImages() {
   const imageContainer = document.getElementById("image-container");
+  const imageTestID = localStorage.getItem("imageTestID"); // Retrieve imageTestID from localStorage
+
+  if (!imageTestID) {
+    console.error("No imageTestID found in localStorage.");
+    return;
+  }
+
   const query = `
     query {
-      getAllImageQuestions {
+      getAllImageQuestions(imageTestID: "${imageTestID}") {
         id
         imageUrl
+        image_Gif_file
         title
         description
         isUsed
+        imageTestID
       }
     }
   `;
@@ -240,13 +256,11 @@ async function fetchImages() {
     imageContainer.innerHTML = "";
 
     images.forEach(image => {
-      // Create a wrapper div to group image, title, and description
       const wrapper = document.createElement("div");
       wrapper.style.textAlign = "center";
       wrapper.style.marginBottom = "20px";
-      wrapper.classList.add("image-wrapper"); // Add class for easier removal later
+      wrapper.classList.add("image-wrapper");
 
-      // Create image element
       const imgElement = document.createElement("img");
       imgElement.src = image.imageUrl;
       imgElement.alt = "Image Question";
@@ -256,15 +270,13 @@ async function fetchImages() {
       imgElement.style.borderRadius = "10px";
       imgElement.style.boxShadow = "0px 4px 10px rgba(0, 0, 0, 0.2)";
 
-      // Create title element
       const titleElement = document.createElement("h3");
       titleElement.innerText = image.title;
       titleElement.style.margin = "5px 0";
 
-      // Create a modal to show image details and the OK and Close buttons
       const modal = document.createElement("div");
       modal.classList.add("modal");
-      modal.style.display = "none"; // Initially hidden
+      modal.style.display = "none";
       modal.style.position = "fixed";
       modal.style.top = "50%";
       modal.style.left = "50%";
@@ -283,7 +295,6 @@ async function fetchImages() {
       modalDescription.innerText = image.description;
       modal.appendChild(modalDescription);
 
-      // Create OK button
       const okButton = document.createElement("button");
       okButton.innerText = "OK";
       okButton.style.marginTop = "20px";
@@ -295,59 +306,49 @@ async function fetchImages() {
       okButton.style.borderRadius = "5px";
       okButton.style.fontSize = "16px";
 
-      // Add OK button click listener
       okButton.addEventListener("click", () => {
-        checkIsUsed(image.id, image.imageUrl, image.title, image.description, wrapper);
-        modal.style.display = "none"; // Close the modal after clicking OK
+        checkIsUsed(image.id, image.imageUrl, image.title,image.description,imageTestID, wrapper);
+        modal.style.display = "none";
       });
 
-      // Create Close button
       const closeButton = document.createElement("button");
       closeButton.innerText = "Close";
       closeButton.style.marginTop = "20px";
       closeButton.style.padding = "10px 20px";
       closeButton.style.cursor = "pointer";
-      closeButton.style.backgroundColor = "#f44336"; // Red for Close button
+      closeButton.style.backgroundColor = "#f44336";
       closeButton.style.color = "#fff";
       closeButton.style.border = "none";
       closeButton.style.borderRadius = "5px";
       closeButton.style.fontSize = "16px";
 
-      // Add Close button click listener
       closeButton.addEventListener("click", () => {
-        modal.style.display = "none"; // Close the modal
+        modal.style.display = "none";
       });
 
-      // Append OK and Close buttons to the modal
       modal.appendChild(okButton);
       modal.appendChild(closeButton);
+      document.body.appendChild(modal);
 
-      document.body.appendChild(modal); // Add modal to the body
-
-      // Add event listener to image
       imgElement.addEventListener("click", () => {
-        modal.style.display = "block"; // Show modal when image is clicked
+        modal.style.display = "block";
       });
 
-      // Append elements to the wrapper
       wrapper.appendChild(imgElement);
       wrapper.appendChild(titleElement);
-
-      // Append wrapper to container
       imageContainer.appendChild(wrapper);
     });
 
-    // Show modal only if there are images to display
     if (images.length > 0) {
       document.getElementById("image-modal").style.display = "flex";
     } else {
       console.log("No unused images available.");
     }
-
   } catch (error) {
     console.error("Error fetching images:", error);
   }
 }
+
 
 // Function to close the first modal
 function closeTestModal() {
@@ -356,12 +357,12 @@ function closeTestModal() {
 
 document.getElementById("close-modal-btn").addEventListener("click", closeTestModal);
 
-async function checkIsUsed(imageID, imageUrl, title, description, wrapper) {
+async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,wrapper) {
   const { admission_no, computerNumber } = getsavedStudentComputerDetails();
 
   const query = `
     query {
-      checkIsUsed(imageUrl: "${imageUrl}")
+      checkIsUsed(imageUrl: "${imageUrl}", imageTestID: "${imageTestID}")
     }
   `;
 
@@ -382,11 +383,14 @@ async function checkIsUsed(imageID, imageUrl, title, description, wrapper) {
       selectedQuestionID = imageID;
       console.log("Selected Question ID:", selectedQuestionID);
 
+      console.log(imageUrl,imageTestID,admission_no,computerNumber);
+      
       // Mutation to update studentId and isUsed status
       const mutation = `
         mutation {
           updateStudentIdAndIsUsed(
             imageUrl: "${imageUrl}",
+            imageTestID: "${imageTestID}",
             studentId: "${admission_no}",
             isUsed: true,
             computerNo: "${computerNumber}"
@@ -405,6 +409,7 @@ async function checkIsUsed(imageID, imageUrl, title, description, wrapper) {
     console.error("Error checking image usage:", error);
   }
 }
+
 
 
 
@@ -583,11 +588,85 @@ document.getElementById('finalizeTrimButton').onclick = async () => {
 
 
 
-startTestBtn.addEventListener("click", async ()=>{
-  startTestBtn.disabled = true; // Disable the button
-  await startRecording();
-  fetchImages();
+// startTestBtn.addEventListener("click", async ()=>{
+//   startTestBtn.disabled = true; // Disable the button
+//   await startRecording();
+//   fetchImages();
+// });
+startTestBtn.addEventListener("click", () => {
+  examModal.style.display = "flex"; // Show modal
 });
+
+// Close modal when "Cancel" is clicked
+closeExamModal.addEventListener("click", () => {
+  examModal.style.display = "none";
+});
+
+// Start the test after details are entered
+// Start the test after details are entered
+confirmExamBtn.addEventListener("click", async () => {
+  const admissionNumber = document.getElementById("admissionNumber").value.trim();
+  const examCode = document.getElementById("examCode").value.trim();
+
+  if (!admissionNumber || !examCode) {
+    alert("Please enter both Admission Number and Exam Code.");
+    return;
+  }
+
+  saveStudentDetails(admissionNumber);
+
+  try {
+    const response = await fetch("http://localhost:5002/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `
+          query {
+            validateImageTestInvitationCode(code: "${examCode}") {
+              isValid
+              imageTestID
+            }
+          }
+        `,
+      }),
+    });
+
+    const result = await response.json();
+    const validationData = result.data?.validateImageTestInvitationCode;
+
+    if (validationData?.isValid) {
+      localStorage.setItem("imageTestID", validationData.imageTestID);
+      
+      // Call mutation to mark the exam code as used
+      await fetch("http://localhost:5002/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `
+            mutation {
+              useImageTestInvitationCode(code: "${examCode}")
+            }
+          `,
+        }),
+      });
+
+      examModal.style.display = "none";
+      startTestBtn.disabled = true;
+      await startRecording();
+      fetchImages();
+    } else {
+      alert("Wrong Exam Code. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error validating exam code:", error);
+    alert("An error occurred. Please try again.");
+  }
+});
+
 
 
 // Listen for image event from main process
