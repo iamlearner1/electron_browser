@@ -240,7 +240,7 @@ async function fetchImages() {
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', { query });
+    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
     let images = response.data.data.getAllImageQuestions;
 
     // Filter images where isUsed is false
@@ -367,7 +367,7 @@ async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,im
   `;
 
   try {
-    const response = await axios.post('http://localhost:5002/graphql', { query });
+    const response = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query });
     const isUsed = response.data.data.checkIsUsed;
     console.log("isUsed:", isUsed);
 
@@ -400,7 +400,7 @@ async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,im
         }
       `;
 
-      const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
+      const mutationResponse = await axios.post('https://d-erps-sd62fh.pragament.com/graphql', { query: mutation });
       console.log("Mutation Response:", mutationResponse.data);
 
       ipcRenderer.send('load-tinkercad', imageUrl,image_Gif_file);
@@ -523,7 +523,7 @@ document.getElementById('saveTrimButton').onclick = async () => {
 async function createVideoHighlightMutation(name, startTime, endTime,selectedQuestionID) {
 
 const {admission_no ,computerNumber} = getsavedStudentComputerDetails();
-  const graphqlEndpoint = 'http://localhost:5002/graphql';
+  const graphqlEndpoint = 'https://d-erps-sd62fh.pragament.com/graphql';
   const studentID = admission_no;
   
   const mutation = `
@@ -617,7 +617,7 @@ confirmExamBtn.addEventListener("click", async () => {
   saveStudentDetails(admissionNumber);
 
   try {
-    const response = await fetch("http://localhost:5002/graphql", {
+    const response = await fetch("https://d-erps-sd62fh.pragament.com/graphql", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -641,7 +641,7 @@ confirmExamBtn.addEventListener("click", async () => {
       localStorage.setItem("imageTestID", validationData.imageTestID);
       
       // Call mutation to mark the exam code as used
-      await fetch("http://localhost:5002/graphql", {
+      await fetch("https://d-erps-sd62fh.pragament.com/graphql", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
