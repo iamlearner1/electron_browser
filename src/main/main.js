@@ -107,13 +107,14 @@ ipcMain.on('open-test-window', (event, { imageUrl }) => {
 
 
 let storedImageUrl = ""; // Declare the variable globally
-
+let storedGifUrl = ""; // Declare the variable globally
 
 ipcMain.on('load-tinkercad', (event, imageUrl,image_Gif_file) => {
   storedImageUrl = imageUrl; // Store the image URL
+  storedGifUrl = image_Gif_file
  // mainWindow.webContents.send('update-webview', 'https://www.tinkercad.com/joinclass/HTGPACXK4');
 });
 
 ipcMain.on('request-image', (event) => {
-  event.sender.send('display-image', storedImageUrl);
+  event.sender.send('display-image', storedImageUrl,storedGifUrl);
 });

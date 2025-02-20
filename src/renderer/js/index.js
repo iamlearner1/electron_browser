@@ -307,7 +307,7 @@ async function fetchImages() {
       okButton.style.fontSize = "16px";
 
       okButton.addEventListener("click", () => {
-        checkIsUsed(image.id, image.imageUrl, image.title,image.description,imageTestID, wrapper);
+        checkIsUsed(image.id, image.imageUrl, image.title,image.description,imageTestID,image.image_Gif_file, wrapper);
         modal.style.display = "none";
       });
 
@@ -357,7 +357,7 @@ function closeTestModal() {
 
 document.getElementById("close-modal-btn").addEventListener("click", closeTestModal);
 
-async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,wrapper) {
+async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,image_Gif_file,wrapper) {
   const { admission_no, computerNumber } = getsavedStudentComputerDetails();
 
   const query = `
@@ -377,7 +377,7 @@ async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,wr
     } else {
       console.log("Image is valid:", imageUrl);
       closeTestModal();
-      openImageModal(imageUrl, title, description);
+      openImageModal(imageUrl,image_Gif_file, title, description);
 
       // Store the selected image ID
       selectedQuestionID = imageID;
@@ -403,7 +403,7 @@ async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,wr
       const mutationResponse = await axios.post('http://localhost:5002/graphql', { query: mutation });
       console.log("Mutation Response:", mutationResponse.data);
 
-      ipcRenderer.send('load-tinkercad', imageUrl);
+      ipcRenderer.send('load-tinkercad', imageUrl,image_Gif_file);
     }
   } catch (error) {
     console.error("Error checking image usage:", error);
@@ -414,9 +414,10 @@ async function checkIsUsed(imageID,imageUrl,  title, description, imageTestID,wr
 
 
 // Function to open the second modal with title and description
-function openImageModal(imageUrl, title, description) {
+function openImageModal(imageUrl,image_Gif_file, title, description) {
   document.getElementById("modalTitle").innerText = title;
   document.getElementById("modalImage").src = imageUrl;
+  document.getElementById("modal3D").src = image_Gif_file;
   document.getElementById("modalDescription").innerText = description;
   document.getElementById("imageModal").style.display = "block";
 }
@@ -670,10 +671,11 @@ confirmExamBtn.addEventListener("click", async () => {
 
 
 // Listen for image event from main process
-ipcRenderer.on('display-image', (event, imageUrl) => {
+ipcRenderer.on('display-image', (event, imageUrl,image_Gif_file) => {
   const modal = document.getElementById('imageModal');
   const modalImage = document.getElementById('modalImage');
-
+  const modalGIF = document.getElementById('modal3D');
+  modalGIF.src = image_Gif_file
   modalImage.src = imageUrl; // Set image source
   modal.style.display = "block"; // Show modal
 });
